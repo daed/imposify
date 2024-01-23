@@ -63,6 +63,7 @@ export async function renderPage(pdf, pageNumber, canvas) {
 	await page.render(renderContext).promise;
 }
 
+/*
 // test
 const testPDFFilename = '../../test/test.pdf';
 
@@ -80,3 +81,5 @@ fs.writeFile('./folded.pdf', res, (content, err) => {
 	  // file written successfully
 	}
 });
+
+*/

@@ -27,7 +27,7 @@ async function createPdfWithPageNumbers(pageCount) {
 }
 
 // Example usage
-const pageNumber = 12; // Specify the number of pages you want
+const pageNumber = 8; // Specify the number of pages you want
 createPdfWithPageNumbers(pageNumber)
     .then((pdfBytes) => {
         const fs = require('fs');
