@@ -1,0 +1,9 @@
+/* global.css */
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: #3e3e3e;
+    color: #ddd;
+}
+
+/* other global styles */
