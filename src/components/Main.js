@@ -29,19 +29,23 @@ const Main = () => {
     };
 
     const decrement = () => {
-        setPageNumber(pageNumber - 1);
+        if(pageNumber - 2 >= 0)
+            setPageNumber(pageNumber - 1);
     };
 
     const increment = () => {
-        setPageNumber(pageNumber + 1);
+        if(pageNumber + 2 <= numPages)
+            setPageNumber(pageNumber + 1);
     };
 
     const decrementFolded = () => {
-        setPageNumberFolded(pageNumberFolded - 1);
+        if(pageNumberFolded - 2 >= 0)
+            setPageNumberFolded(pageNumberFolded - 1);
     };
 
     const incrementFolded = () => {
-        setPageNumberFolded(pageNumberFolded + 1);
+        if(pageNumberFolded + 2 <= numPagesFolded)
+            setPageNumberFolded(pageNumberFolded + 1);
     };
 
     const handlePreviewButtonClick = () => {
