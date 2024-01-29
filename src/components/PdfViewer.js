@@ -1,7 +1,7 @@
-import { h, Component } from 'preact';
-import { PDFDocument } from 'pdf-lib';
+import React from 'react';
+import { PDFDocument, convertPageToImage } from 'pdf-lib';
 
-class PdfViewer extends Component {
+class PdfViewer extends React.Component {
     state = {
         pageImages: []
     };

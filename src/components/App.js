@@ -1,13 +1,11 @@
-import { h, Component } from 'preact';
+import React from 'react';
 import Main from './Main';
 
-import styles from './styles.less';
-
-export default class App extends Component {
+export default class App extends React.Component {
     render() {
         return (
             <div>
-                <Main></Main>
+                <Main />
             </div>
         );
     }

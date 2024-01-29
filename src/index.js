@@ -1,8 +1,9 @@
-// index.js
+import React from 'react';
+import ReactDOM from 'react-dom';
 import './global.css'; // Adjust the path according to your project structure
-import { h, render } from 'preact';
 import App from './components/App';
+import { createRoot } from 'react-dom/client';
 
 
-render(<App />, document.getElementById('app'));
-
+const root = createRoot(document.getElementById('root'));
+root.render(<App />);
