@@ -4,6 +4,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 import { loadPDF, foldPDF } from "../lib/pdf.mjs";
 
 const Main = () => {
+    const filePreviewRef = useRef(null);
     const fileInputRef = useRef(null);
     const [rawPDF, setRawPDF] = useState(null);
     const [foldedPDF, setFoldedPDF] = useState(null);
@@ -43,30 +44,42 @@ const Main = () => {
         setPageNumberFolded(pageNumberFolded + 1);
     };
 
-    const handleButtonClick = () => {
+    const handlePreviewButtonClick = () => {
+        filePreviewRef.current.click();
+    }
+
+    const handleDownloadButtonClick = () => {
         fileInputRef.current.click();
     };
 
-    const handleFileChange = async (event) => {
+    const handlePreview = async (event) => {
         const file = event.target.files[0];
         if (file) {
             try {
                 setRawPDF(file);
-
                 const fileBytes = await file.arrayBuffer();
                 // Now fileBytes can be used with pdf-lib
                 const loadedPdfData = await loadPDF(fileBytes);
                 console.log(loadedPdfData);
                 // foldPDF returns as 'bytes'
                 const foldedPdf = await foldPDF(loadedPdfData);
-                console.log(foldedPdf);
                 
                 // Create a blob from the bytes
                 const blob = new Blob([foldedPdf], { type: "application/pdf" });
                 setFoldedPDF(blob);
+            } catch (error) {
+                console.error("Error processing file:", error);
+            }
+        }
+    };
 
+    const handleFileChange = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            try {
+                
                 // Create a URL for the blob
-                const url = URL.createObjectURL(blob);
+                const url = URL.createObjectURL(foldedPDF);
 
                 // Create a temporary link element and trigger the download
                 const link = document.createElement("a");
@@ -89,7 +102,17 @@ const Main = () => {
                 <h1>PDF Flipper</h1>
             </Box>
             <Box>
-                <Button onClick={handleButtonClick}>Upload PDF</Button>
+                <Button onClick={handlePreviewButtonClick}>Preview PDF</Button>
+                <input
+                    type="file"
+                    ref={filePreviewRef}
+                    onChange={handlePreview}
+                    style={{ display: "none" }}
+                    accept="application/pdf"
+                />
+            </Box>
+            <Box>
+                <Button onClick={handleDownloadButtonClick}>Download PDF</Button>
                 <input
                     type="file"
                     ref={fileInputRef}
@@ -98,9 +121,7 @@ const Main = () => {
                     accept="application/pdf"
                 />
             </Box>
-            <Box>Upload the PDF</Box>
-            <Box>Click the button</Box>
-            <Box>Download the things</Box>
+
             <Box display="flex" flexDirection="row">
                 <Box id="testRaw" width="200px" height="600px">
                     <Document
