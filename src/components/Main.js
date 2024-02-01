@@ -30,22 +30,22 @@ const Main = () => {
 
     const decrement = () => {
         if(pageNumber - 2 >= 0)
-            setPageNumber(pageNumber - 1);
+            setPageNumber(pageNumber - 2);
     };
 
     const increment = () => {
         if(pageNumber + 2 <= numPages)
-            setPageNumber(pageNumber + 1);
+            setPageNumber(pageNumber + 2);
     };
 
     const decrementFolded = () => {
         if(pageNumberFolded - 2 >= 0)
-            setPageNumberFolded(pageNumberFolded - 1);
+            setPageNumberFolded(pageNumberFolded - 2);
     };
 
     const incrementFolded = () => {
         if(pageNumberFolded + 2 <= numPagesFolded)
-            setPageNumberFolded(pageNumberFolded + 1);
+            setPageNumberFolded(pageNumberFolded + 2 );
     };
 
     const handlePreviewButtonClick = () => {
@@ -126,30 +126,31 @@ const Main = () => {
                 />
             </Box>
 
-            <Box display="flex" flexDirection="row">
-                <Box id="testRaw" width="200px" height="600px">
+            <Box display="flex" flexDirection="row" margin="auto">
+                <Box id="testRaw" margin="10px">
                     <Document
                         file={rawPDF}
                         onLoadSuccess={onDocumentLoadSuccessRaw}
                     >
-                        <Box display={"flex"} flexDirection={"row"}>
+                        <Box display={"flex"} flexDirection={"row"} width="500px">
                             <Page
                                 pageNumber={pageNumber}
                                 renderAnnotationLayer={false}
                                 renderTextLayer={false}
+                                width={window.innerWidth * 0.20} // 25% of the window width
                             />
                             <Page
                                 pageNumber={pageNumber + 1}
                                 renderAnnotationLayer={false}
                                 renderTextLayer={false}
+                                width={window.innerWidth * 0.20} // 25% of the window width
                             />
                         </Box>
                     </Document>
                     <Button onClick={decrement}> - </Button>
                     <Button onClick={increment}> + </Button>
                 </Box>
-                <Box width="1000px"/>
-                <Box id="testFolded" width="200px" height="600px">
+                <Box id="testFolded" margin="10px">
                     <Document
                         file={foldedPDF}
                         onLoadSuccess={onDocumentLoadSuccessFolded}
@@ -159,11 +160,13 @@ const Main = () => {
                                 pageNumber={pageNumberFolded}
                                 renderAnnotationLayer={false}
                                 renderTextLayer={false}
+                                width={window.innerWidth * 0.20} // 25% of the window width
                             />
                             <Page
                                 pageNumber={pageNumberFolded + 1}
                                 renderAnnotationLayer={false}
                                 renderTextLayer={false}
+                                width={window.innerWidth * 0.20} // 25% of the window width
                             />
                         </Box>
                     </Document>
