@@ -127,12 +127,12 @@ const Main = () => {
             </Box>
 
             <Box display="flex" flexDirection="row" margin="auto">
-                <Box id="testRaw" margin="10px">
+                <Box id="testRaw" margin="50px 50px 0 0">
                     <Document
                         file={rawPDF}
                         onLoadSuccess={onDocumentLoadSuccessRaw}
                     >
-                        <Box display={"flex"} flexDirection={"row"} width="500px">
+                        <Box display={"flex"} flexDirection={"row"}>
                             <Page
                                 pageNumber={pageNumber}
                                 renderAnnotationLayer={false}
@@ -150,7 +150,7 @@ const Main = () => {
                     <Button onClick={decrement}> - </Button>
                     <Button onClick={increment}> + </Button>
                 </Box>
-                <Box id="testFolded" margin="10px">
+                <Box id="testFolded" margin="50px 0 0 50px">
                     <Document
                         file={foldedPDF}
                         onLoadSuccess={onDocumentLoadSuccessFolded}
