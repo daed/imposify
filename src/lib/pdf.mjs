@@ -46,8 +46,7 @@ export async function foldPDF(pdf, start=0, end=0) {
 		
 		end -= 2;
 	}
-	const bytes = await newPdf.save();
-	return bytes;
+	return newPdf
 }
 
 export async function renderPage(pdf, pageNumber, canvas) {
@@ -63,23 +62,59 @@ export async function renderPage(pdf, pageNumber, canvas) {
 	await page.render(renderContext).promise;
 }
 
-/*
-// test
-const testPDFFilename = '../../test/test.pdf';
+export async function compositeTwoPages(firstPage, secondPage, workingPdf) { 
+  const width = firstPage.width;
+  const height = firstPage.height;
+  console.log(`compositeTwoPages: page width: ${width}, ${height}`);
+  // Create a new page with double the width of the original to hold two pages side by side
+  const newPage = workingPdf.addPage([width * 2, height]);
 
-import fs from 'fs';
-const data = await fs.promises.readFile(testPDFFilename);
-const pdf = await loadPDF(data);
-console.log("pdf: ");
-console.log(pdf.length);
-const res = await foldPDF(pdf)
+  console.log("rendering first page");
+  // Draw the first page on the left half
+  newPage.drawPage(firstPage, {
+    x: 0,
+    y: 0,
+    width: width,
+    height: height,
+  });
+  
+  console.log("rendering second page");
+  // Draw the second page on the right half
+  newPage.drawPage(secondPage, {
+    x: width, // Offset by the width of the first page
+    y: 0,
+    width: width,
+    height: height,
+  });
+  
+}
 
-fs.writeFile('./folded.pdf', res, (content, err) => {
-	if (err) {
-	  console.error(err);
-	} else {
-	  // file written successfully
+export async function createBookletPDF(originalPdfBytes) {
+	const originalPdfDoc = await PDFDocument.load(originalPdfBytes);
+	console.log("folding pdf");
+	const foldedPdf = await foldPDF(originalPdfDoc);
+	
+	const newPdfDoc = await PDFDocument.create();
+	console.log("original pdf");
+	console.log(originalPdfDoc);
+	console.log("folded pdf");
+	console.log(foldedPdf);
+
+	for (let i=0; i<foldedPdf.getPages().length; i+=2) {
+		console.log(`getting pages ${i} and ${i+1}`);
+		const [firstPage] = await newPdfDoc.embedPdf(foldedPdf, [i]);
+		const [secondPage] = await newPdfDoc.embedPdf(foldedPdf, [i+1]);
+		
+		//const [firstPage] = await newPdfDoc.copyPages(foldedPdf, [i]);
+		//const [secondPage] = await newPdfDoc.copyPages(foldedPdf, [i+1]);
+		console.log("pdf page:");
+		console.log(firstPage);
+		await compositeTwoPages(firstPage, secondPage, newPdfDoc);
+		console.log(`composited ${i} and ${i+1}`);
 	}
-});
-
-*/
+	// Serialize the PDFDocument to bytes
+	const pdfBytes = await newPdfDoc.save();
+	// Here, you can save the pdfBytes to a file, or return it from a server endpoint, etc.
+	return pdfBytes;
+	
+}
