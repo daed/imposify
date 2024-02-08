@@ -1,51 +1,50 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import Footer from "./Footer";
 import { Box, Button } from "@mui/material";
 import { Document, Page, pdfjs } from "react-pdf";
-import { loadPDF, foldPDF } from "../lib/pdf.mjs";
+import { createBookletPDF } from "../lib/pdf.mjs";
 
 const Main = () => {
     const filePreviewRef = useRef(null);
-    const fileInputRef = useRef(null);
-    const [rawPDF, setRawPDF] = useState(null);
+    const [loaded, setLoaded] = useState(false);
     const [foldedPDF, setFoldedPDF] = useState(null);
-    const [numPages, setNumPages] = useState(null);
     const [numPagesFolded, setNumPagesFolded] = useState(null);
-
-    const [pageNumber, setPageNumber] = useState(1);
     const [pageNumberFolded, setPageNumberFolded] = useState(1);
+    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
+    
+    // Function to update the width
+    const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+    };
 
+    useEffect(() => {
+        window.addEventListener('resize', handleResize);
+        // Cleanup the event listener on component unmount
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount
+    // Calculate the desired width as 40% of the window width
+    const pageWidth = windowWidth * 0.4;
+    
 
     pdfjs.GlobalWorkerOptions.workerSrc = new URL(
         "pdfjs-dist/build/pdf.worker.min.js",
         import.meta.url
     ).toString();
 
-    const onDocumentLoadSuccessRaw = ({ numPages }) => {
-        setNumPages(numPages);
-    };
-
     const onDocumentLoadSuccessFolded = ({ numPages }) => {
         setNumPagesFolded(numPages);
     };
 
-    const decrement = () => {
-        if(pageNumber - 2 >= 0)
-            setPageNumber(pageNumber - 2);
-    };
-
-    const increment = () => {
-        if(pageNumber + 2 <= numPages)
-            setPageNumber(pageNumber + 2);
-    };
-
     const decrementFolded = () => {
         if(pageNumberFolded - 2 >= 0)
-            setPageNumberFolded(pageNumberFolded - 2);
+            setPageNumberFolded(pageNumberFolded - 1);
     };
 
     const incrementFolded = () => {
         if(pageNumberFolded + 2 <= numPagesFolded)
-            setPageNumberFolded(pageNumberFolded + 2 );
+            setPageNumberFolded(pageNumberFolded + 1);
     };
 
     const handlePreviewButtonClick = () => {
@@ -53,60 +52,49 @@ const Main = () => {
     }
 
     const handleDownloadButtonClick = () => {
-        fileInputRef.current.click();
+        try {
+            // Create a URL for the blob
+            const url = URL.createObjectURL(foldedPDF);
+
+            // Create a temporary link element and trigger the download
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = "folded-pdf.pdf"; // Name the download file
+            document.body.appendChild(link);
+            link.click();
+
+            // Clean up
+            document.body.removeChild(link);
+            URL.revokeObjectURL(url);
+        } catch (error) {
+            console.error("Error generating download:", error);
+        }
     };
 
+    var file = null;
     const handlePreview = async (event) => {
-        const file = event.target.files[0];
+        file = event.target.files[0];
         if (file) {
             try {
-                setRawPDF(file);
-                const fileBytes = await file.arrayBuffer();
-                // Now fileBytes can be used with pdf-lib
-                const loadedPdfData = await loadPDF(fileBytes);
-                console.log(loadedPdfData);
-                // foldPDF returns as 'bytes'
-                const foldedPdf = await foldPDF(loadedPdfData);
-                
+                const completedPdf = await createBookletPDF(await file.arrayBuffer());
                 // Create a blob from the bytes
-                const blob = new Blob([foldedPdf], { type: "application/pdf" });
+                const blob = new Blob([completedPdf], { type: "application/pdf" });
                 setFoldedPDF(blob);
+                setLoaded(true);
             } catch (error) {
                 console.error("Error processing file:", error);
             }
         }
     };
 
-    const handleFileChange = async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            try {
-                
-                // Create a URL for the blob
-                const url = URL.createObjectURL(foldedPDF);
-
-                // Create a temporary link element and trigger the download
-                const link = document.createElement("a");
-                link.href = url;
-                link.download = "folded-pdf.pdf"; // Name the download file
-                document.body.appendChild(link);
-                link.click();
-
-                // Clean up
-                document.body.removeChild(link);
-                URL.revokeObjectURL(url);
-            } catch (error) {
-                console.error("Error processing file:", error);
-            }
-        }
-    };
     return (
         <Box id="main">
             <Box>
-                <h1>PDF Flipper</h1>
+                <h1>Once Upon a Spine</h1>
+                <h2>a free book imposition tool</h2>
             </Box>
-            <Box>
-                <Button onClick={handlePreviewButtonClick}>Preview PDF</Button>
+            <Box display="flex">
+                <Button onClick={handlePreviewButtonClick}>Open PDF</Button>
                 <input
                     type="file"
                     ref={filePreviewRef}
@@ -114,66 +102,87 @@ const Main = () => {
                     style={{ display: "none" }}
                     accept="application/pdf"
                 />
-            </Box>
-            <Box>
-                <Button onClick={handleDownloadButtonClick}>Download PDF</Button>
-                <input
-                    type="file"
-                    ref={fileInputRef}
-                    onChange={handleFileChange}
-                    style={{ display: "none" }}
-                    accept="application/pdf"
-                />
+                <Box id="pdfDisplayBlock">
+                    <Button disabled={!loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
+                </Box>
             </Box>
 
-            <Box display="flex" flexDirection="row" margin="auto">
-                <Box id="testRaw" margin="50px 50px 0 0">
-                    <Document
-                        file={rawPDF}
-                        onLoadSuccess={onDocumentLoadSuccessRaw}
-                    >
-                        <Box display={"flex"} flexDirection={"row"}>
-                            <Page
-                                pageNumber={pageNumber}
-                                renderAnnotationLayer={false}
-                                renderTextLayer={false}
-                                width={window.innerWidth * 0.20} // 25% of the window width
-                            />
-                            <Page
-                                pageNumber={pageNumber + 1}
-                                renderAnnotationLayer={false}
-                                renderTextLayer={false}
-                                width={window.innerWidth * 0.20} // 25% of the window width
-                            />
-                        </Box>
-                    </Document>
-                    <Button onClick={decrement}> - </Button>
-                    <Button onClick={increment}> + </Button>
+            <Box 
+                display="flex" 
+                margin="auto"
+                minHeight={500}
+                maxWidth={1200}
+                justifyContent="space-between"
+                flexDirection="row"
+            >
+                <Box textAlign="left" maxWidth="40%">
+                    <Box>
+                        <h3>
+                            info
+                        </h3>
+                        <p>
+                            This is a <a href="https://en.wikipedia.org/wiki/Imposition">book imposition</a> tool,
+                            intended to take a normal pdf paged from 1-whatever in order and rearrange
+                            the pages so that they can be folded together into a <a href="https://en.wikipedia.org/wiki/Section_(bookbinding)">signature</a> and be
+                            ordered correctly from the front page to the back.
+                        </p>
+                        <p>
+                            Currently the tool only functions for a PDF with a multiple of 4 pages.  It only
+                            does two page imposition, which is a comfortable size for US Letter size printing.
+                            It can only create a signle signature.  It will only impose in left-to-right order.  
+                        </p>
+                        <p>
+                            If there are additional features you are interested in, please let me know via
+                            the Github link below!
+                        </p>
+                    </Box>
+                    <Box>
+                        <h3>
+                            directions
+                        </h3>
+                        <ol>
+                            <li>
+                                Click Open PDF to begin
+                            </li>
+                            <li>
+                                Select PDF file from local computer
+                            </li>
+                            <li>
+                                Click download to get and enjoy the pretty preview
+                            </li>
+                            <li>
+                                (manual duplex only)
+                                Set printer settings to only print odd pages and print
+                            </li>
+                            <li>
+                                (manual duplex only)
+                                Take stack of papers, flip upside down, and reinsert into printer tray
+                            </li>
+                        </ol>
+                    </Box>
                 </Box>
-                <Box id="testFolded" margin="50px 0 0 50px">
+                <Box minWidth="40%" textAlign="left" id="testFolded" marginBottom="20px">
+                    <h3>preview</h3>
                     <Document
                         file={foldedPDF}
                         onLoadSuccess={onDocumentLoadSuccessFolded}
                     >
-                        <Box display={"flex"} flexDirection={"row"}>
+                        <Box display="flex" flexDirection="row">
                             <Page
                                 pageNumber={pageNumberFolded}
                                 renderAnnotationLayer={false}
                                 renderTextLayer={false}
-                                width={window.innerWidth * 0.20} // 25% of the window width
-                            />
-                            <Page
-                                pageNumber={pageNumberFolded + 1}
-                                renderAnnotationLayer={false}
-                                renderTextLayer={false}
-                                width={window.innerWidth * 0.20} // 25% of the window width
+                                width={pageWidth} // 25% of the window width
                             />
                         </Box>
                     </Document>
-                    <Button onClick={decrementFolded}> - </Button>
-                    <Button onClick={incrementFolded}> + </Button>
+                    <Box position="relative" display="flex" width="100%" justifyContent="center" bottom={0}>
+                        <Button onClick={decrementFolded}> - </Button>
+                        <Button onClick={incrementFolded}> + </Button>
+                    </Box>
                 </Box>
             </Box>
+            <Footer></Footer>
         </Box>
     );
 };

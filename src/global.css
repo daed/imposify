@@ -13,4 +13,25 @@ body {
     margin:auto;
 }
 
-/* other global styles */
+/* Base link color */
+a {
+    color: #90EE90; /* Light Green */
+    text-decoration: none;
+    transition: color 0.3s ease; /* Smooth transition for color change */
+  }
+  
+  /* Hover state */
+  a:hover {
+    color: #76C76B; /* A slightly darker shade of green for contrast */
+    text-decoration: underline; /* Optional: adds underline on hover */
+  }
+  
+  /* Active state */
+  a:active {
+    color: #5DA356; /* Even darker green to indicate the link is being clicked */
+  }
+  
+  /* Visited state */
+  a:visited {
+    color: #B0C4DE; /* Light Steel Blue for a soft, distinguishable look */
+  }
