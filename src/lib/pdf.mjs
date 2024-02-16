@@ -1,11 +1,6 @@
 // pdf.js
 import { PDFDocument } from 'pdf-lib';
 
-
-function print(pages) {
-	return console.log(`front: (${pages[0]}, ${pages[3]}) back: (${pages[1]}, ${pages[2]})`);
-}
-
 export async function loadPDF(pdfURL) {
 	return await PDFDocument.load(pdfURL);
 }
@@ -22,12 +17,12 @@ export async function foldPDF(pdf, start=0, end=0) {
 
 	// sanity check
 	if (start > end) {
-		console.error("Overran the page nubmers, something went wrong!");
+		console.error("Overran the page numbers, something went wrong!");
 		return;
 	}
 	
 	// pdf length must be multiples of 4
-	if (len % 4 != 0) {
+	if (len % 4 !== 0) {
 		console.error("pdf is incorrect number of pages.  This will fail");
 		return;
 	}

@@ -1,5 +1,6 @@
 import React from "react";
 import { Box } from "@mui/material";
+import Donation from "./Donation";
 
 const Footer = () => {
     return (
@@ -14,8 +15,10 @@ const Footer = () => {
                 </p>
             </Box>
             <Box textAlign="left" maxWidth="35%" paddingLeft="6px" marginRight="6px" position="relative" bottom={0}>
-                <p>See any bugs?  Want new features added?</p>
-                <p>Come checkout the <a href="https://github.com/daed/pdf-flipper/issues">github page!</a></p>
+                <Box textAlign={"right"}>
+                    <p>Come checkout the <a href="https://github.com/daed/pdf-flipper/issues">github page!</a></p>
+                    <Donation></Donation>
+                </Box>
             </Box>
         </Box>
     );

@@ -26,8 +26,14 @@ const Main = () => {
         };
     }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount
     
+    let pageWidth;
     // Calculate the desired width as 40% of the window width
-    const pageWidth = windowWidth * 0.4;
+    if (windowWidth > 599) {
+        pageWidth = windowWidth * 0.4;
+    }
+    else {
+        pageWidth = windowWidth * 0.8;
+    }
 
     pdfjs.GlobalWorkerOptions.workerSrc = new URL(
         "pdfjs-dist/build/pdf.worker.min.js",
@@ -115,6 +121,7 @@ const Main = () => {
                 maxWidth={1200}
                 justifyContent="space-between"
                 flexDirection="row"
+                class="column-fold"
             >
                 <Directions></Directions>
                 <Box minWidth="40%" textAlign="left" id="testFolded" marginBottom="20px">

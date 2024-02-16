@@ -3,10 +3,10 @@ import { Box } from "@mui/material";
 
 const Directions = () => {
     return (
-        <Box textAlign="left" maxWidth="40%">
-            <Box>
+        <Box class="full-mobile" textAlign="left" maxWidth="40%">
+            <Box class="hidden-mobile" textAlign="left">
                 <h3>
-                    info
+                    Info
                 </h3>
                 <p>
                     This is a <a href="https://en.wikipedia.org/wiki/Imposition">book imposition</a> tool,
@@ -17,7 +17,7 @@ const Directions = () => {
                 <p>
                     Currently the tool only functions for a PDF with a multiple of 4 pages.  It only
                     does two page imposition, which is a comfortable size for US Letter size printing.
-                    It can only create a signle signature.  It will only impose in left-to-right order.  
+                    It can only create a single signature.  It will only impose in left-to-right order.  
                 </p>
                 <p>
                     If there are additional features you are interested in, please let me know via
@@ -26,7 +26,7 @@ const Directions = () => {
             </Box>
             <Box>
                 <h3>
-                    directions
+                    Directions
                 </h3>
                 <ol>
                     <li>

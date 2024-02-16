@@ -8,10 +8,20 @@ body {
     color: #ddd;
 }
 
+li {
+  text-align: left;
+}
+
 .container {
     width: 90%;
     margin:auto;
 }
+
+p {
+  text-align: justify;
+  text-justify: inter-word; 
+}
+
 
 /* Base link color */
 a {
@@ -35,3 +45,38 @@ a {
   a:visited {
     color: #B0C4DE; /* Light Steel Blue for a soft, distinguishable look */
   }
+
+/* Style for devices with a width less than 600px */
+@media (max-width: 599px) {
+  .container {
+    padding: 20px;
+  }
+  .hidden-mobile {
+    display: none;
+    visibility: hidden;
+  }
+  .column-fold {
+    flex-direction: column-reverse;
+    display: flex;
+    justify-content: space-between;
+  }
+  .full-mobile {
+    width: 100%;
+  }
+}
+
+/* Style for devices with a width of 600px and above */
+@media (min-width: 600px) {
+  .container {
+    padding: 40px;
+  }
+  .column-fold {
+    flex-direction: row;
+    display: flex;
+    justify-content: space-between;
+  }
+  .full-mobile {
+    width: 40%; 
+  }
+}
+
