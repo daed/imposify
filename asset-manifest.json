@@ -1,13 +1,13 @@
 {
   "files": {
     "main.css": "/pdf-flipper/static/css/main.7707e566.css",
-    "main.js": "/pdf-flipper/static/js/main.7277cc3d.js",
+    "main.js": "/pdf-flipper/static/js/main.497eaf1a.js",
     "index.html": "/pdf-flipper/index.html",
     "main.7707e566.css.map": "/pdf-flipper/static/css/main.7707e566.css.map",
-    "main.7277cc3d.js.map": "/pdf-flipper/static/js/main.7277cc3d.js.map"
+    "main.497eaf1a.js.map": "/pdf-flipper/static/js/main.497eaf1a.js.map"
   },
   "entrypoints": [
     "static/css/main.7707e566.css",
-    "static/js/main.7277cc3d.js"
+    "static/js/main.497eaf1a.js"
   ]
 }
