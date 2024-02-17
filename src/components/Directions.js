@@ -15,8 +15,10 @@ const Directions = () => {
                     ordered correctly from the front page to the back.
                 </p>
                 <p>
-                    Currently the tool only functions for a PDF with a multiple of 4 pages.  It only
-                    does two page imposition, which is a comfortable size for US Letter size printing.
+                    This imposition tool works best with PDFs that are multiples of 4 pages long.  If
+                    imposing a PDF of a different length, it will pad out the PDF with blank white pages.
+                    It sticks these pages at the end of the PDF, just inside the back cover.  It only
+                    does two page imposition, which is a very comfortable size for US Letter size printing.
                     It can only create a single signature.  It will only impose in left-to-right order.  
                 </p>
                 <p>
