@@ -13,39 +13,29 @@ const Main = () => {
     const [pageNumberFolded, setPageNumberFolded] = useState(1);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
     
-    // Function to update the width
-    const handleResize = () => {
-        setWindowWidth(window.innerWidth);
-    };
-
     useEffect(() => {
         window.addEventListener('resize', handleResize);
-        // Cleanup the event listener on component unmount
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount
-    
+    }, []);
+
     let pageWidth;
-    // Calculate the desired width as 40% of the window width
     if (windowWidth > 599) {
         pageWidth = windowWidth * 0.4;
-    }
-    else {
+    } else {
         pageWidth = windowWidth * 0.8;
     }
 
-    pdfjs.GlobalWorkerOptions.workerSrc = new URL(
-        "pdfjs-dist/build/pdf.worker.min.js",
-        import.meta.url
-    ).toString();
+    // Set the path to the PDF.js worker from a CDN
+    pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
     const onDocumentLoadSuccessFolded = ({ numPages }) => {
         setNumPagesFolded(numPages);
     };
 
     const decrementFolded = () => {
-        if(pageNumberFolded - 1 >= 0)
+        if(pageNumberFolded - 1 >= 1) // Updated to prevent going below 1
             setPageNumberFolded(pageNumberFolded - 1);
     };
 
@@ -54,23 +44,22 @@ const Main = () => {
             setPageNumberFolded(pageNumberFolded + 1);
     };
 
+    const handleResize = () => {
+        setWindowWidth(window.innerWidth);
+    };
+
     const handlePreviewButtonClick = () => {
         filePreviewRef.current.click();
-    }
+    };
 
     const handleDownloadButtonClick = () => {
         try {
-            // Create a URL for the blob
             const url = URL.createObjectURL(foldedPDF);
-
-            // Create a temporary link element and trigger the download
             const link = document.createElement("a");
             link.href = url;
-            link.download = "folded-pdf.pdf"; // Name the download file
+            link.download = "folded-pdf.pdf";
             document.body.appendChild(link);
             link.click();
-
-            // Clean up
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         } catch (error) {
@@ -78,13 +67,11 @@ const Main = () => {
         }
     };
 
-    var file = null;
     const handlePreview = async (event) => {
-        file = event.target.files[0];
+        const file = event.target.files[0];
         if (file) {
             try {
                 const completedPdf = await createBookletPDF(await file.arrayBuffer());
-                // Create a blob from the bytes
                 const blob = new Blob([completedPdf], { type: "application/pdf" });
                 setFoldedPDF(blob);
                 setLoaded(true);
@@ -125,7 +112,7 @@ const Main = () => {
             >
                 <Directions></Directions>
                 <Box minWidth="40%" textAlign="left" id="testFolded" marginBottom="20px">
-                    <h3>preview</h3>
+                    <h3>Preview</h3>
                     <Document
                         file={foldedPDF}
                         onLoadSuccess={onDocumentLoadSuccessFolded}

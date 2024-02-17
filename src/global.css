@@ -12,6 +12,10 @@ li {
   text-align: left;
 }
 
+h3 {
+  text-align: center;
+}
+
 .container {
     width: 90%;
     margin:auto;
