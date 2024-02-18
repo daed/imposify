@@ -1,70 +1,60 @@
-# Getting Started with Create React App
+# pdf-flipper
+#### a free pdf imposition tool
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+## About
 
-## Available Scripts
+pdf-flipper is a <a href="https://en.wikipedia.org/wiki/Imposition">book imposition</a>
+tool, intended to take a normal pdf paged from 1 to whatever in order and rearrange
+the pages so that they can be folded together into a <a href="https://en.wikipedia.org/wiki/Section_(bookbinding)">signature</a> and still be ordered correctly from the front page to the back.
 
-In the project directory, you can run:
+This tool is available for free at <a href="https://imposify.com/">imposify.com</a>.
 
-### `npm start`
+pdf-flipper works best with PDFs that are multiples of 4 pages long. If imposing a PDF of a different length, it will pad out the PDF with blank white pages. It sticks these pages at the end of the PDF, just inside the back cover. 
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+Currently it only does two page imposition, which is a very comfortable size for US Letter size printing. 
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+It can only create a single signature. 
 
-### `npm test`
+It will only impose in left-to-right order.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">Comic Fury Zine</a>, a free comics anthology.
 
-### `npm run build`
+## Features and Roadmap
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+[x] Simple two-page imposition
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+[x] Preview panel
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+[x] Automatic PDF padding
 
-### `npm run eject`
+[ ] Configurable number of pages per sheet
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+[ ] Multiple signatures
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+[ ] Automated Testing
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+[ ] N-up fine tuning
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
+[ ] Creep adjustment
 
-## Learn More
+[ ] Bleed and Trim adjustments
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+[ ] Printing marks
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+[ ] Proofing options
 
-### Code Splitting
+## Development
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+The project is a simple React app make with create-react-app.  The configs are unejected.   Material UI is used heavily.  
 
-### Analyzing the Bundle Size
+PDF.js is used for preview rendering, and pdf-lib handles the pdf manipulation itself.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+Run `yarn start` to start up in development mode.
 
-### Making a Progressive Web App
+Run `yarn build` to produce production files.
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+## Contributors
 
-### Advanced Configuration
+daed
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+Funkh0user
