@@ -84,8 +84,8 @@ const Main = () => {
     return (
         <Box id="main">
             <Box>
-                <h1>Once Upon a Spine</h1>
-                <h2>a free book imposition tool</h2>
+                <h1>Imposify</h1>
+                <h2>the free book imposition tool</h2>
             </Box>
             <Box display="flex">
                 <Button onClick={handlePreviewButtonClick}>Open PDF</Button>
