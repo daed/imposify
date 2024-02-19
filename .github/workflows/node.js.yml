@@ -12,7 +12,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v1
         with:
-          node-version: '16' # Specify the Node version
+          node-version: '20' # Specify the Node version
 
       - name: Install Dependencies
         run: yarn install # Using yarn as requested
