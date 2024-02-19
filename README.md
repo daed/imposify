@@ -47,7 +47,7 @@ This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">C
 
 The project is a simple React app make with create-react-app.  The configs are unejected.   Material UI is used heavily.  
 
-PDF.js is used for preview rendering, and pdf-lib handles the pdf manipulation itself.
+PDF.js is used for preview rendering, and pdf-lib handles the pdf manipulation itself. 
 
 Run `yarn start` to start up in development mode.
 
