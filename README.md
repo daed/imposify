@@ -1,15 +1,15 @@
-# pdf-flipper
+# imposify
 #### a free pdf imposition tool
 
 ## About
 
-pdf-flipper is a <a href="https://en.wikipedia.org/wiki/Imposition">book imposition</a>
+Imposify is a <a href="https://en.wikipedia.org/wiki/Imposition">book imposition</a>
 tool, intended to take a normal pdf paged from 1 to whatever in order and rearrange
 the pages so that they can be folded together into a <a href="https://en.wikipedia.org/wiki/Section_(bookbinding)">signature</a> and still be ordered correctly from the front page to the back.
 
 This tool is available for free at <a href="https://imposify.com/">imposify.com</a>.
 
-pdf-flipper works best with PDFs that are multiples of 4 pages long. If imposing a PDF of a different length, it will pad out the PDF with blank white pages. It sticks these pages at the end of the PDF, just inside the back cover. 
+Imposify works best with PDFs that are multiples of 4 pages long. If imposing a PDF of a different length, it will pad out the PDF with blank white pages. It sticks these pages at the end of the PDF, just inside the back cover. 
 
 Currently it only does two page imposition, which is a very comfortable size for US Letter size printing. 
 
