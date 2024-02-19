@@ -7,7 +7,6 @@ export async function loadPDF(pdfURL) {
 
 export async function foldPDF(pdf, start=0, end=0) {
 	const len = getPDFLength(pdf);
-	const pdfData = pdf.getPages();
 	console.log(`len: ${len}`);
 
 	// unless specified, autodetect the end
