@@ -127,8 +127,8 @@ const Main = () => {
                         </Box>
                     </Document>
                     <Box position="relative" display="flex" width="100%" justifyContent="center" bottom={0}>
-                        <Button onClick={decrementFolded}> - </Button>
-                        <Button onClick={incrementFolded}> + </Button>
+                        <Button style={{ fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
+                        <Button style={{ fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
                     </Box>
                 </Box>
             </Box>
