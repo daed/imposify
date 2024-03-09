@@ -25,6 +25,56 @@ export async function isPdfPrintedInSpread(pdf) {
 	return true;
 }
 
+async function splitPDFSpreads(pdf) {
+  // Create a new PDF document
+  const newPdfDoc = await PDFDocument.create();
+
+  // For non-spread pages, just copy the page as is
+  const [copiedFirstPage] = await newPdfDoc.copyPages(pdf, [0]);
+  newPdfDoc.addPage(copiedFirstPage);
+
+  for (let pageIndex = 1; pageIndex < pdf.getPageCount() - 1; pageIndex++) {
+    const page = pdf.getPage(pageIndex);
+
+    // Assuming you have a way to detect spreads. If this page is a spread, proceed.
+    if (true) {
+      const {width, height} = page.getSize();
+      const middle = width / 2;
+
+      // Copy the left half of the spread
+      const leftPage = await newPdfDoc.addPage([middle, height]);
+      const copiedPageLeft = await newPdfDoc.embedPage(page, {
+        left: 0,
+        bottom: 0,
+        right: middle,
+        top: height,
+      });
+      leftPage.drawPage(copiedPageLeft);
+
+      // Copy the right half of the spread
+      const rightPage = await newPdfDoc.addPage([middle, height]);
+      const copiedPageRight = await newPdfDoc.embedPage(page, {
+        left: middle,
+        bottom: 0,
+        right: width,
+        top: height,
+      });
+      rightPage.drawPage(copiedPageRight);
+    } else {
+      // For non-spread pages, just copy the page as is
+      const [copiedPage] = await newPdfDoc.copyPages(pdf, [pageIndex]);
+      newPdfDoc.addPage(copiedPage);
+    }
+  }
+  
+  // For non-spread pages, just copy the page as is
+  console.log(`last page: ${pdf.getPageCount()-1}`);
+  const [copiedLastPage] = await newPdfDoc.copyPages(pdf, [pdf.getPageCount()-1]);
+  newPdfDoc.addPage(copiedLastPage);
+  
+  return newPdfDoc;
+}
+
 export async function foldPDF(pdf, start=0, end=0) {
 	const len = getPDFLength(pdf);
 	console.log(`len: ${len}`);
@@ -101,7 +151,6 @@ export async function compositeTwoPages(firstPage, secondPage, workingPdf) {
     width: width,
     height: height,
   });
-  
 }
 
 function getPDFLength(pdfDoc) {
@@ -163,7 +212,12 @@ async function addPagesBeforeLast(pdfDoc, pages=1) {
 }
 
 export async function createBookletPDF(originalPdfBytes) {
+	// load pdf -> split spreads -> pad pages -> reorder for stuff
 	let originalPdfDoc = await PDFDocument.load(originalPdfBytes);
+
+	if (isPdfPrintedInSpread(originalPdfDoc)) {
+		originalPdfDoc = await splitPDFSpreads(originalPdfDoc);
+	}
 	const len = originalPdfDoc.getPageCount();
 	console.log(`initial pdf page count: ${len}`);
 	// Calculate how many blank pages are needed to make the page count a multiple of 4
