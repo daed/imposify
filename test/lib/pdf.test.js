@@ -43,6 +43,8 @@ describe('PDF manipulation tests', () => {
     });
   });
 
+
+  
   // Add more tests for renderPage, compositeTwoPages, and createBookletPDF following similar patterns
 
 });

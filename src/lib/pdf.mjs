@@ -5,6 +5,26 @@ export async function loadPDF(pdfURL) {
 	return await PDFDocument.load(pdfURL);
 }
 
+export async function isPdfPrintedInSpread(pdf) {
+	const pages = pdf.getPages();
+	const firstPage = pages[0];
+	const secondPage = pages[1];
+	const lastPage = pages[pages.length - 1];
+	// if it's less than 4 then it's either spreads or it's not enough pages
+	if (pages.length < 4) {
+		for(let i=1; i<pages.length-1; i++) {
+			if (firstPage.width !== pages[i].width) return false; 
+		}
+		return true;
+	}
+	if (firstPage.width === lastPage.width) { 
+		for(let i=2; i<pages.length-2; i++) {
+			if (secondPage.width !== pages[i].width) return false; 
+		}
+	}
+	return true;
+}
+
 export async function foldPDF(pdf, start=0, end=0) {
 	const len = getPDFLength(pdf);
 	console.log(`len: ${len}`);
