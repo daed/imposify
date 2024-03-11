@@ -5,6 +5,7 @@ import { Box, Button } from "@mui/material";
 import { Document, Page, pdfjs } from "react-pdf";
 import { createBookletPDF } from "../lib/pdf.mjs";
 
+
 const Main = () => {
     const filePreviewRef = useRef(null);
     const [loaded, setLoaded] = useState(false);
@@ -105,6 +106,7 @@ const Main = () => {
                 display="flex" 
                 margin="auto"
                 minHeight={500}
+                maxHeight={"150%"}
                 maxWidth={1200}
                 justifyContent="space-between"
                 flexDirection="row"
