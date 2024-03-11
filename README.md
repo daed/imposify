@@ -1,4 +1,6 @@
 # imposify
+![imposify logo looks like a sylized book icon](https://raw.githubusercontent.com/daed/imposify/develop/public/logobanner.png)
+
 #### a free pdf imposition tool
 
 ## About
