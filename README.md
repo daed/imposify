@@ -27,6 +27,8 @@ This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">C
 
 [x] Automatic PDF padding
 
+[x] Spread/Page detection
+
 [ ] Configurable number of pages per sheet
 
 [ ] Multiple signatures
