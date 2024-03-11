@@ -7,24 +7,52 @@ export async function loadPDF(pdfURL) {
 
 export async function isPdfPrintedInSpread(pdf) {
 	const pages = pdf.getPages();
-	const firstPage = pages[0];
-	const secondPage = pages[1];
-	const lastPage = pages[pages.length - 1];
-	// if it's less than 4 then it's either spreads or it's not enough pages
-	if (pages.length < 4) {
-		for(let i=1; i<pages.length-1; i++) {
-			if (firstPage.width !== pages[i].width) return false; 
-		}
-		return true;
-	}
-	if (firstPage.width === lastPage.width) { 
-		for(let i=2; i<pages.length-2; i++) {
-			if (secondPage.width !== pages[i].width) return false; 
-		}
-	}
-	return true;
-}
+	console.log("spread detection starts here");
 
+	// Ensure there are enough pages to compare
+	if (pages.length < 2) return false;
+  
+	const firstPage = pages[0];
+	const lastPage = pages[pages.length - 1];
+	
+	const backInsideCoverIndex = pages.length - 2;
+	const firstPageWidth = firstPage.getSize().width;
+	const lastPageWidth = lastPage.getSize().width;
+	let interiorPageWidth = pages[1].getSize().width; 
+	const backInsideCoverWidth = pages[backInsideCoverIndex].getSize().width;
+	
+	console.log(`last page: page ${pages.length-1}:`);
+	console.log(`firstPage.width: ${firstPageWidth}`);
+	console.log(`pages[1].width: ${pages[1].getSize().width}`);
+	console.log(`lastPage.width: ${lastPageWidth}`);
+	console.log(`pages[${backInsideCoverIndex}].width: ${backInsideCoverWidth}`);
+
+	// Early exit for very short documents
+	if (pages.length < 4) {
+	  // If it's less than 4 pages, check if the first/last pages are narrower (assuming they could be half-width covers)
+	  console.log("less than 4 pages");
+	  console.log(`spread return ${firstPageWidth < interiorPageWidth || lastPageWidth < backInsideCoverWidth}`);
+	  return firstPageWidth < interiorPageWidth || lastPageWidth < backInsideCoverWidth;
+	}
+	const arePagesWider = (firstPageWidth < interiorPageWidth || lastPageWidth < interiorPageWidth);
+  	if (arePagesWider) {
+	  console.log(`interior page was wider ${interiorPageWidth} than first/last page ${firstPageWidth}/${lastPageWidth}`);
+	  // Further validation to ensure consistency among interior pages
+	  for (let i = 2; i < pages.length - 2; i++) {
+		  if (pages[i].getSize().width !== interiorPageWidth) {
+			console.log(`pages[${i}].width ${pages[i].getSize().width} !== interiorPageWidth: ${pages[i].getSize().width !== interiorPageWidth}`);
+			console.log("spread return false");  
+		  return false; // Found an inconsistency, not a spread
+		}
+	  }
+	  console.log(``)
+	  console.log("spread return true");
+	  return true; // All checks passed, likely a spread
+	}
+	console.log("spread return false");  
+	return false; // Default case, doesn't match the spread criteria
+  }
+  
 async function splitPDFSpreads(pdf) {
   // Create a new PDF document
   const newPdfDoc = await PDFDocument.create();
@@ -215,7 +243,8 @@ export async function createBookletPDF(originalPdfBytes) {
 	// load pdf -> split spreads -> pad pages -> reorder for stuff
 	let originalPdfDoc = await PDFDocument.load(originalPdfBytes);
 
-	if (isPdfPrintedInSpread(originalPdfDoc)) {
+	if (await isPdfPrintedInSpread(originalPdfDoc)) {
+		console.log("spread pages detected in pdf, splitting!");
 		originalPdfDoc = await splitPDFSpreads(originalPdfDoc);
 	}
 	const len = originalPdfDoc.getPageCount();
