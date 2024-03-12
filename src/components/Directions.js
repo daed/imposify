@@ -32,7 +32,7 @@ const Directions = () => {
                 </h3>
                 <ol>
                     <li>
-                        Click Open PDF to begin
+                        Click Open PDF to begin (or now drag and drop a PDF!)
                     </li>
                     <li>
                         Select PDF file from local computer
