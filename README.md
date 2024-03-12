@@ -31,6 +31,8 @@ This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">C
 
 [x] Spread/Page detection
 
+[x] Drag and Drop
+
 [ ] Configurable number of pages per sheet
 
 [ ] Multiple signatures
