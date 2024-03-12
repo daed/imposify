@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import Directions from "./Directions";
 import Footer from "./Footer";
-import { Box, Button } from "@mui/material";
+import { Box, Button, Typography } from "@mui/material";
 import { Document, Page, pdfjs } from "react-pdf";
 import { createBookletPDF } from "../lib/pdf.mjs";
 
@@ -9,6 +9,7 @@ import { createBookletPDF } from "../lib/pdf.mjs";
 const Main = () => {
     const filePreviewRef = useRef(null);
     const [loaded, setLoaded] = useState(false);
+    const [isDragging, setIsDragging] = useState(false);
     const [foldedPDF, setFoldedPDF] = useState(null);
     const [numPagesFolded, setNumPagesFolded] = useState(null);
     const [pageNumberFolded, setPageNumberFolded] = useState(1);
@@ -68,6 +69,26 @@ const Main = () => {
         }
     };
 
+
+    const processFile = async (file) => {
+        try {
+            const completedPdf = await createBookletPDF(await file.arrayBuffer());
+            const blob = new Blob([completedPdf], { type: "application/pdf" });
+            setFoldedPDF(blob);
+            setLoaded(true);
+        } catch (error) {
+            console.error("Error processing file:", error);
+        }
+    };
+    
+    const handlePreview = async (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            processFile(file);
+        }
+    };
+
+/*
     const handlePreview = async (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -81,59 +102,109 @@ const Main = () => {
             }
         }
     };
+*/
+const handleDragEnter = (event) => {
+    event.preventDefault();
+    setIsDragging(true);
+};
+
+const handleDragOver = (event) => {
+    event.preventDefault(); // Necessary to allow the drop
+    // Keep the drag state active, might not be strictly necessary depending on your CSS
+    setIsDragging(true);
+};
+
+const handleDragLeave = (event) => {
+    event.preventDefault();
+    setIsDragging(false); // Reset drag state when leaving the drop area
+};
+
+const handleDrop = async (event) => {
+    event.preventDefault();
+    setIsDragging(false); // Reset drag state on drop
+    const file = event.dataTransfer.files[0];
+    if (file && file.type === "application/pdf") {
+        processFile(file);
+    }
+};
 
     return (
-        <Box id="main">
-            <Box>
-                <h1>Imposify</h1>
-                <h2>the free book imposition tool</h2>
-            </Box>
-            <Box display="flex">
-                <Button onClick={handlePreviewButtonClick}>Open PDF</Button>
-                <input
-                    type="file"
-                    ref={filePreviewRef}
-                    onChange={handlePreview}
-                    style={{ display: "none" }}
-                    accept="application/pdf"
-                />
-                <Box id="pdfDisplayBlock">
-                    <Button disabled={!loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
+        <Box id="main"
+        onDrop={handleDrop}
+        onDragOver={handleDragOver}
+        onDragEnter={handleDragEnter}
+        onDragLeave={handleDragLeave}
+        style={{ border: isDragging ? '2px dashed #000' : '1px solid #ddd', padding: '20px', textAlign: 'center' }} 
+        >
+            {isDragging && (
+        <Box
+            position="absolute"
+            top={0}
+            left={0}
+            width="100%"
+            height="100%"
+            display="flex"
+            justifyContent="center"
+            alignItems="center"
+            backgroundColor="rgba(0, 0, 0, 0.5)" // Translucent background
+            zIndex={2} // Ensure it's above other content
+            style={{ pointerEvents: "none" }} // Allows clicks to go through if necessary
+        >
+            <Typography variant="h4" color="white">
+                Drag and drop PDF files here
+            </Typography>
+        </Box>
+    )}
+                <Box>
+                    <h1>Imposify</h1>
+                    <h2>the free book imposition tool</h2>
                 </Box>
-            </Box>
-
-            <Box 
-                display="flex" 
-                margin="auto"
-                minHeight={500}
-                maxHeight={"150%"}
-                maxWidth={1200}
-                justifyContent="space-between"
-                flexDirection="row"
-                class="column-fold"
-            >
-                <Directions></Directions>
-                <Box minWidth="40%" textAlign="left" id="testFolded" marginBottom="20px">
-                    <h3>Preview</h3>
-                    <Document
-                        file={foldedPDF}
-                        onLoadSuccess={onDocumentLoadSuccessFolded}
-                    >
-                        <Box display="flex" flexDirection="row">
-                            <Page
-                                pageNumber={pageNumberFolded}
-                                renderAnnotationLayer={false}
-                                renderTextLayer={false}
-                                width={pageWidth} // 25% of the window width
-                            />
-                        </Box>
-                    </Document>
-                    <Box position="relative" display="flex" width="100%" justifyContent="center" bottom={0}>
-                        <Button style={{ fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
-                        <Button style={{ fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
+                <Box display="flex">
+                    <Button onClick={handlePreviewButtonClick}>Open PDF</Button>
+                    <input
+                        type="file"
+                        ref={filePreviewRef}
+                        onChange={handlePreview}
+                        style={{ display: "none" }}
+                        accept="application/pdf"
+                    />
+                    <Box id="pdfDisplayBlock">
+                        <Button disabled={!loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
                     </Box>
                 </Box>
-            </Box>
+
+                <Box 
+                    display="flex" 
+                    margin="auto"
+                    minHeight={500}
+                    maxHeight={"150%"}
+                    maxWidth={1200}
+                    justifyContent="space-between"
+                    flexDirection="row"
+                    class="column-fold"
+                >
+                    <Directions></Directions>
+                    <Box minWidth="40%" textAlign="left" id="testFolded" marginBottom="20px">
+                        <h3>Preview</h3>
+                        <Document
+                            file={foldedPDF}
+                            onLoadSuccess={onDocumentLoadSuccessFolded}
+                        >
+                            <Box display="flex" flexDirection="row">
+                                <Page
+                                    pageNumber={pageNumberFolded}
+                                    renderAnnotationLayer={false}
+                                    renderTextLayer={false}
+                                    width={pageWidth} // 25% of the window width
+                                />
+                            </Box>
+                        </Document>
+                        <Box position="relative" display="flex" width="100%" justifyContent="center" bottom={0}>
+                            <Button style={{ fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
+                            <Button style={{ fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
+                        </Box>
+                    </Box>
+                </Box>
             <Footer></Footer>
         </Box>
     );
