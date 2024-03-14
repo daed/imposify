@@ -14,7 +14,6 @@ const Main = () => {
     const [numPagesFolded, setNumPagesFolded] = useState(null);
     const [pageNumberFolded, setPageNumberFolded] = useState(1);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    const [showSpinner, setShowSpinner] = useState(false);
 
     useEffect(() => {
         window.addEventListener('resize', handleResize);
