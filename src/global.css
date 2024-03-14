@@ -6,6 +6,8 @@ body {
     font-family: Arial, sans-serif;
     background-color: #3e3e3e;
     color: #ddd;
+    width: 100vw;
+    height: 100%;
 }
 
 li {
@@ -18,6 +20,7 @@ h3 {
 
 .container {
     width: 90%;
+    max-width: 1200;
     margin:auto;
 }
 
@@ -49,6 +52,12 @@ a {
   a:visited {
     color: #B0C4DE; /* Light Steel Blue for a soft, distinguishable look */
   }
+
+.hidden {
+  display: none;
+  visibility: hidden;
+}
+
 
 /* Style for devices with a width less than 600px */
 @media (max-width: 599px) {
@@ -84,3 +93,25 @@ a {
   }
 }
 
+.doc-box {
+  height: 100%;
+  width: 100%;
+}
+
+.spinner {
+  border: 8px solid rgba(0, 0, 0, 0.1);
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border-left-color: #90EE90;
+  animation: spin 1s ease infinite;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}

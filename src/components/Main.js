@@ -1,10 +1,10 @@
 import React, { useEffect, useRef, useState } from "react";
 import Directions from "./Directions";
+import Spinner from "./Spinner";
 import Footer from "./Footer";
 import { Box, Button, Typography } from "@mui/material";
 import { Document, Page, pdfjs } from "react-pdf";
 import { createBookletPDF } from "../lib/pdf.mjs";
-
 
 const Main = () => {
     const filePreviewRef = useRef(null);
@@ -14,7 +14,8 @@ const Main = () => {
     const [numPagesFolded, setNumPagesFolded] = useState(null);
     const [pageNumberFolded, setPageNumberFolded] = useState(1);
     const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-    
+    const [showSpinner, setShowSpinner] = useState(false);
+
     useEffect(() => {
         window.addEventListener('resize', handleResize);
         return () => {
@@ -23,8 +24,10 @@ const Main = () => {
     }, []);
 
     let pageWidth;
-    if (windowWidth > 599) {
-        pageWidth = windowWidth * 0.4;
+    if (windowWidth > 1400) {
+        pageWidth = 1400 * 0.425;        
+    } else if (windowWidth > 599) {
+        pageWidth = windowWidth * 0.425;
     } else {
         pageWidth = windowWidth * 0.8;
     }
@@ -32,7 +35,21 @@ const Main = () => {
     // Set the path to the PDF.js worker from a CDN
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
+    const setSpinner = (val) => {
+        const docBox = document.getElementById("document-box");
+        const spinBox = document.getElementById("spinner-box")
+        if (val) {
+            docBox.classList = "hidden";
+            spinBox.classList = "";
+        }
+        else {
+            docBox.classList = "doc-box";
+            spinBox.classList = "hidden";
+        }
+    };
+
     const onDocumentLoadSuccessFolded = ({ numPages }) => {
+        setLoaded(true);
         setNumPagesFolded(numPages);
     };
 
@@ -71,11 +88,14 @@ const Main = () => {
 
 
     const processFile = async (file) => {
-        try {
+        try {            
+            setSpinner(true);
             const completedPdf = await createBookletPDF(await file.arrayBuffer());
             const blob = new Blob([completedPdf], { type: "application/pdf" });
             setFoldedPDF(blob);
             setLoaded(true);
+            // We're loaded but we should delay unshowing the Spinner just a while
+            setTimeout(() => setSpinner(false), 1250);
         } catch (error) {
             console.error("Error processing file:", error);
         }
@@ -88,21 +108,6 @@ const Main = () => {
         }
     };
 
-/*
-    const handlePreview = async (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            try {
-                const completedPdf = await createBookletPDF(await file.arrayBuffer());
-                const blob = new Blob([completedPdf], { type: "application/pdf" });
-                setFoldedPDF(blob);
-                setLoaded(true);
-            } catch (error) {
-                console.error("Error processing file:", error);
-            }
-        }
-    };
-*/
 const handleDragEnter = (event) => {
     event.preventDefault();
     setIsDragging(true);
@@ -134,7 +139,7 @@ const handleDrop = async (event) => {
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        style={{ border: isDragging ? '2px dashed #000' : '1px solid #ddd', padding: '20px', textAlign: 'center' }} 
+        style={{ border: isDragging ? '2px dashed #000' : '1px solid #ddd', maxWidth: "1200px", margin: "auto", padding: '20px', textAlign: 'center' }} 
         >
             {isDragging && (
         <Box
@@ -172,39 +177,44 @@ const handleDrop = async (event) => {
                         <Button disabled={!loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
                     </Box>
                 </Box>
-
                 <Box 
-                    display="flex" 
-                    margin="auto"
-                    minHeight={500}
-                    maxHeight={"150%"}
-                    maxWidth={1200}
-                    justifyContent="space-between"
-                    flexDirection="row"
-                    class="column-fold"
+                display="flex" 
+                margin="auto"
+                maxWidth={1200}
+                justifyContent="space-between"
+                flexDirection="row"
+                class="column-fold"
                 >
-                    <Directions></Directions>
-                    <Box minWidth="40%" textAlign="left" id="testFolded" marginBottom="20px">
-                        <h3>Preview</h3>
-                        <Document
-                            file={foldedPDF}
-                            onLoadSuccess={onDocumentLoadSuccessFolded}
-                        >
-                            <Box display="flex" flexDirection="row">
-                                <Page
-                                    pageNumber={pageNumberFolded}
-                                    renderAnnotationLayer={false}
-                                    renderTextLayer={false}
-                                    width={pageWidth} // 25% of the window width
-                                />
+                <Directions></Directions>
+                <Box minWidth="50%" maxWidth="50%" textAlign="left" id="testFolded" marginBottom="20px">
+                    <h3>Preview</h3>
+                    <Box height id="spinner-box" className="hidden" >
+                        <Box display="flex" minHeight="80%" alignItems="baseline" justifyContent="center">
+                            <Box margin="20%">
+                                <Spinner />
                             </Box>
-                        </Document>
-                        <Box position="relative" display="flex" width="100%" justifyContent="center" bottom={0}>
-                            <Button style={{ fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
-                            <Button style={{ fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
+                        </Box>
+                    </Box>
+                    <Box maxWidth="100%" height="100%" margin="auto" id="document-box" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
+                        <Box width={pageWidth} margin="auto" minHeight="80%">
+                                <Document width={pageWidth} file={foldedPDF} onLoadSuccess={onDocumentLoadSuccessFolded}>
+                                    <Page
+                                        pageNumber={pageNumberFolded}
+                                        renderAnnotationLayer={false}
+                                        renderTextLayer={false}
+                                        width={pageWidth}
+                                        >
+
+                                    </Page>
+                                </Document>
+                        </Box>
+                        <Box display="flex" width="100%" justifyContent="center">
+                            <Button style={{ width: "50%", fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
+                            <Button style={{ width: "50%", fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
                         </Box>
                     </Box>
                 </Box>
+            </Box>
             <Footer></Footer>
         </Box>
     );
