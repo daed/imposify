@@ -3,8 +3,8 @@ import Directions from "./Directions";
 import Spinner from "./Spinner";
 import Footer from "./Footer";
 import { Box, Button, Typography } from "@mui/material";
+import Impose from "../lib/imposifiy.mjs";
 import { Document, Page, pdfjs } from "react-pdf";
-import { Impose } from "../lib/imposifiy.mjs";
 
 const impose = new Impose();
 
@@ -53,25 +53,31 @@ const Main = () => {
         setLoaded(true);
         setNumPagesFolded(numPages);
     };
-
+    
     const decrementFolded = () => {
         if(pageNumberFolded - 1 >= 1) // Updated to prevent going below 1
-            setPageNumberFolded(pageNumberFolded - 1);
+        setPageNumberFolded(pageNumberFolded - 1);
     };
-
+    
     const incrementFolded = () => {
         if(pageNumberFolded + 1 <= numPagesFolded)
-            setPageNumberFolded(pageNumberFolded + 1);
-    };
+        setPageNumberFolded(pageNumberFolded + 1);
+};
 
-    const handleResize = () => {
+const handleResize = () => {
+    
+    if (windowWidth > 599) {
+            pageWidth = windowWidth * 0.4;
+        } else {
+            pageWidth = windowWidth * 0.8;
+        }
         setWindowWidth(window.innerWidth);
     };
-
+    
     const handlePreviewButtonClick = () => {
         filePreviewRef.current.click();
     };
-
+    
     const handleDownloadButtonClick = () => {
         try {
             const url = URL.createObjectURL(foldedPDF);

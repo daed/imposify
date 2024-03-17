@@ -93,7 +93,8 @@ export default class Impose {
         return false;
     }
 
-    async foldPDF(pdf, start=0, end=0) {
+    async foldPDF(start=0, end=0) {
+        const pdf = this.pdf;
         const len = this.getPDFLength(pdf);
         console.log(`len: ${len}`);
     
@@ -129,7 +130,8 @@ export default class Impose {
             
             end -= 2;
         }
-        return newPdf
+        this.pdf = newPdf
+        return true;
     }
 
     async renderPage(pageNumber, canvas) {
@@ -231,23 +233,27 @@ export default class Impose {
     async createBooklet() {
         // load pdf -> split spreads -> pad pages -> reorder for stuff
         let pdf = this.pdf;
-        if (this.isPdfPrintedInSpread(pdf)) {
-            this.pdf = await this.splitPDFSpreads(pdf);
-        }
-        const len = this.originalPdfDoc.getPageCount();
-        // Calculate how many blank pages are needed to make the page count a multiple of 4
-        let pagesToAdd = (4 - (len % 4)) % 4; // This ensures that we add pages only if needed
-        if (pagesToAdd)	this.originalPdfDoc = await this.addPagesBeforeLast(pdf, pagesToAdd);
-        const foldedPdf = await this.foldPDF();
-        const newPdfDoc = await PDFDocument.create();
-        for (let i=0; i<foldedPdf.getPages().length; i+=2) {
-            const [firstPage] = await newPdfDoc.embedPdf(foldedPdf, [i]);
-            const [secondPage] = await newPdfDoc.embedPdf(foldedPdf, [i+1]);
-            await this._makePageSpread(firstPage, secondPage, newPdfDoc);
-        }
-        // Serialize the PDFDocument to bytes
-        const pdfBytes = await newPdfDoc.save();
-        // Here, you can save the pdfBytes to a file, or return it from a server endpoint, etc.
-        return pdfBytes;
+        if (this.pdf) {
+
+            if (this.isSpreadPrinted()) {
+                this.pdf = await this.detachSpreads();
+            }
+            const len = this.pdf.getPageCount();
+            // Calculate how many blank pages are needed to make the page count a multiple of 4
+            let pagesToAdd = (4 - (len % 4)) % 4; // This ensures that we add pages only if needed
+            if (pagesToAdd)	this.originalPdfDoc = await this.addPagesBeforeLast(pdf, pagesToAdd);
+            const foldedPdf = await this.foldPDF();
+            const newPdfDoc = await PDFDocument.create();
+            for (let i=0; i<foldedPdf.getPages().length; i+=2) {
+                const [firstPage] = await newPdfDoc.embedPdf(foldedPdf, [i]);
+                const [secondPage] = await newPdfDoc.embedPdf(foldedPdf, [i+1]);
+                await this._makePageSpread(firstPage, secondPage, newPdfDoc);
+            }
+            // Serialize the PDFDocument to bytes
+            const pdfBytes = await newPdfDoc.save();
+            // Here, you can save the pdfBytes to a file, or return it from a server endpoint, etc.
+            return pdfBytes;
+            }
+        return false;
     }
 }
