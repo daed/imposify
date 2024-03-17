@@ -1,4 +1,6 @@
 # imposify
+![imposify logo looks like a sylized book icon](https://raw.githubusercontent.com/daed/imposify/develop/public/logobanner.png)
+
 #### a free pdf imposition tool
 
 ## About
@@ -26,6 +28,10 @@ This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">C
 [x] Preview panel
 
 [x] Automatic PDF padding
+
+[x] Spread/Page detection
+
+[x] Drag and Drop
 
 [ ] Configurable number of pages per sheet
 

@@ -8,7 +8,7 @@ const Donation = () => {
 
     return (
       <div>
-        <button onClick={handleSupportClick} style={{ backgroundColor: '#29abe0', color: 'white', padding: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
+        <button onClick={handleSupportClick} style={{ backgroundColor: 'darkslategrey', color: '#90EE90', padding: '10px', border: 'none', borderRadius: '5px', cursor: 'pointer' }}>
           Support Me on Ko-fi
         </button>
       </div>
