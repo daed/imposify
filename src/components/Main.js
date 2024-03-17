@@ -3,7 +3,9 @@ import Directions from "./Directions";
 import Footer from "./Footer";
 import { Box, Button } from "@mui/material";
 import { Document, Page, pdfjs } from "react-pdf";
-import { createBookletPDF } from "../lib/pdf.mjs";
+import { Impose } from "../lib/imposifiy.mjs";
+
+const impose = new Impose();
 
 const Main = () => {
     const filePreviewRef = useRef(null);
