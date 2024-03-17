@@ -1,39 +1,35 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect,  useRef, useState } from "react";
 import Directions from "./Directions";
 import Spinner from "./Spinner";
 import Footer from "./Footer";
 import { Box, Button, Typography } from "@mui/material";
+import Impose from "../lib/imposifiy.mjs";
 import { Document, Page, pdfjs } from "react-pdf";
-import { createBookletPDF } from "../lib/pdf.mjs";
 
 const Main = () => {
-    const filePreviewRef = useRef(null);
+    // Create a ref to store the file input element
+    const fileInputRef = useRef(null);
+    // Boolean to determine if we are loaded
     const [loaded, setLoaded] = useState(false);
+    // Boolean to determine if we are dragging a file
     const [isDragging, setIsDragging] = useState(false);
+    // holds the pdf binary blob used in the preview
     const [foldedPDF, setFoldedPDF] = useState(null);
+    // number of pages in the folded pdf
     const [numPagesFolded, setNumPagesFolded] = useState(null);
+    // current page of the pdf preview
     const [pageNumberFolded, setPageNumberFolded] = useState(1);
-    const [windowWidth, setWindowWidth] = useState(window.innerWidth);
-
-    useEffect(() => {
-        window.addEventListener('resize', handleResize);
-        return () => {
-            window.removeEventListener('resize', handleResize);
-        };
-    }, []);
-
-    let pageWidth;
-    if (windowWidth > 1400) {
-        pageWidth = 1400 * 0.425;        
-    } else if (windowWidth > 599) {
-        pageWidth = windowWidth * 0.425;
-    } else {
-        pageWidth = windowWidth * 0.8;
-    }
+    // auto-calculated width of the pdf preview (in pixels)
+    const [previewWidth, setPreviewWidth] = useState();
+    // our pdf manipulation class itself
+    const [impose, setImpose] = useState(() => new Impose());
 
     // Set the path to the PDF.js worker from a CDN
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
+    // Turns the spinner on/off via CSS.  doing it this way instead of
+    // via react state seems to result in a quicker loading initial
+    // image than allowing a rerender would.
     const setSpinner = (val) => {
         const docBox = document.getElementById("document-box");
         const spinBox = document.getElementById("spinner-box")
@@ -47,29 +43,29 @@ const Main = () => {
         }
     };
 
-    const onDocumentLoadSuccessFolded = ({ numPages }) => {
+    // runs after the pdf is folded and the preview is rendering
+    const onPDFFoldSuccess = ({ numPages }) => {
+        console.log("onPDFFoldSuccess: pdf should have loaded correctly");
         setLoaded(true);
         setNumPagesFolded(numPages);
     };
 
+    // move preview to the previous set of pages
     const decrementFolded = () => {
         if(pageNumberFolded - 1 >= 1) // Updated to prevent going below 1
             setPageNumberFolded(pageNumberFolded - 1);
     };
 
+    // move preview to the next set of pages
     const incrementFolded = () => {
         if(pageNumberFolded + 1 <= numPagesFolded)
             setPageNumberFolded(pageNumberFolded + 1);
     };
 
-    const handleResize = () => {
-        setWindowWidth(window.innerWidth);
-    };
 
-    const handlePreviewButtonClick = () => {
-        filePreviewRef.current.click();
-    };
 
+    // "download pdf" gets clicked by the user.  adds a anchor
+    // to the page and triggers it to start the file download.
     const handleDownloadButtonClick = () => {
         try {
             const url = URL.createObjectURL(foldedPDF);
@@ -78,6 +74,7 @@ const Main = () => {
             link.download = "folded-pdf.pdf";
             document.body.appendChild(link);
             link.click();
+            // don't leave the link dangling
             document.body.removeChild(link);
             URL.revokeObjectURL(url);
         } catch (error) {
@@ -86,51 +83,90 @@ const Main = () => {
     };
 
 
+    // pdf file passed to imposify via drag and drop or by open
+    // menu.  currently this function loads a pdf, imposes it
+    // via a simple two-page spread method, converts it back to
+    // a pdf blob, and prepares it for rendering.
     const processFile = async (file) => {
-        try {            
+        handleResize();
+        setPageNumberFolded(1);
+        let completedPDF = false;
+        try {
             setSpinner(true);
-            const completedPdf = await createBookletPDF(await file.arrayBuffer());
-            const blob = new Blob([completedPdf], { type: "application/pdf" });
-            setFoldedPDF(blob);
-            setLoaded(true);
-            // We're loaded but we should delay unshowing the Spinner just a while
-            setTimeout(() => setSpinner(false), 1250);
+            console.log("loading");
+            // load pdf here
+            await impose.loadPDF(await file.arrayBuffer());
+            console.log("imposing");
+            // createBooklet() does a lot all at once.
+            const completedPdf = await impose.createBooklet();
+            console.log("converting to binary blob");
+            // generate blob from pdf
+            if (completedPdf) {
+                const blob = new Blob([completedPdf], { type: "application/pdf" });
+                console.log("setting state for preview rendering")
+                setFoldedPDF(blob);
+                setLoaded(true);
+            }
+            else {
+                throw new Error(`completedPDF was ${completedPDF}`);
+            }
         } catch (error) {
             console.error("Error processing file:", error);
         }
+        // We're loaded but we should delay unshowing the Spinner just a while
+        setTimeout(() => setSpinner(false), 1250);
     };
-    
-    const handlePreview = async (event) => {
+
+
+    // we have to calculate the size of the preview canvas outside of css
+    const handleResize = () => {
+        if (window.innerWidth > 599) {
+            setPreviewWidth(window.innerWidth * 0.4);
+        } else {
+            setPreviewWidth(window.innerWidth * 0.8);
+        }
+    };
+
+    const handleOpenButtonClick = () => {
+        // Programmatically click the hidden file input
+        fileInputRef.current.click();
+    };
+
+    // handle open button
+    const handleFileSelected = async (event) => {
         const file = event.target.files[0];
         if (file) {
             processFile(file);
         }
     };
+    // handle drag and drop
+    const handleDrop = async (event) => {
+        event.preventDefault();
+        setIsDragging(false); // Reset drag state on drop
+        const file = event.dataTransfer.files[0];
+        if (file && file.type === "application/pdf") {
+            processFile(file);
+        }
+    };
+    // handle dragging activity overlay
+    const handleDragEnter = (event) => {
+        event.preventDefault();
+        setIsDragging(true);
+    };
+    const handleDragOver = handleDragEnter;
+    // turn off dragging overlay afterward
+    const handleDragLeave = (event) => {
+        event.preventDefault();
+        setIsDragging(false); // Reset drag state when leaving the drop area
+    };
 
-const handleDragEnter = (event) => {
-    event.preventDefault();
-    setIsDragging(true);
-};
 
-const handleDragOver = (event) => {
-    event.preventDefault(); // Necessary to allow the drop
-    // Keep the drag state active, might not be strictly necessary depending on your CSS
-    setIsDragging(true);
-};
-
-const handleDragLeave = (event) => {
-    event.preventDefault();
-    setIsDragging(false); // Reset drag state when leaving the drop area
-};
-
-const handleDrop = async (event) => {
-    event.preventDefault();
-    setIsDragging(false); // Reset drag state on drop
-    const file = event.dataTransfer.files[0];
-    if (file && file.type === "application/pdf") {
-        processFile(file);
-    }
-};
+    useEffect(() => {
+        window.addEventListener('resize', handleResize);
+        return () => {
+            window.removeEventListener('resize', handleResize);
+        };
+    }, []);
 
     return (
         <Box id="main"
@@ -138,39 +174,46 @@ const handleDrop = async (event) => {
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        style={{ border: isDragging ? '2px dashed #000' : '1px solid #ddd', maxWidth: "1200px", margin: "auto", padding: '20px', textAlign: 'center' }} 
-        >
-            {isDragging && (
-        <Box
-            position="absolute"
-            top={0}
-            left={0}
-            width="100%"
-            height="100%"
-            display="flex"
-            justifyContent="center"
-            alignItems="center"
-            backgroundColor="rgba(0, 0, 0, 0.5)" // Translucent background
-            zIndex={2} // Ensure it's above other content
-            style={{ pointerEvents: "none" }} // Allows clicks to go through if necessary
-        >
-            <Typography variant="h4" color="white">
-                Drag and drop PDF files here
-            </Typography>
-        </Box>
-    )}
+        style={{ 
+            border: isDragging ? '2px dashed #000' : '1px solid #ddd',
+            backgroundColor: isDragging ? "rgba(0, 0, 0, 0.5)" : 'unset',
+            maxWidth: "1200px",
+            margin: "auto",
+            padding: '20px',
+            textAlign: 'center' }} 
+            >
+                {isDragging && (
+                    <Box
+                    position="absolute"
+                    top={0}
+                    left={0}
+                    width="100%"
+                    height="100%"
+                    display="flex"
+                    justifyContent="center"
+                    alignItems="center"
+                    overflow="hidden"
+                    backgroundColor="rgba(0, 0, 0, 0.5)" // Translucent background
+                    zIndex={2} // Ensure it's above other content
+                    style={{ pointerEvents: "none" }} // Allows clicks to go through if necessary
+                    >
+                        <Typography overflow="hidden" variant="h4" color="white">
+                            Drag and drop PDF files here
+                        </Typography>
+                    </Box>
+                )} 
                 <Box>
                     <h1>Imposify</h1>
                     <h2>the free book imposition tool</h2>
                 </Box>
                 <Box display="flex">
-                    <Button onClick={handlePreviewButtonClick}>Open PDF</Button>
+                    <Button onClick={handleOpenButtonClick}>Open PDF</Button>
                     <input
                         type="file"
-                        ref={filePreviewRef}
-                        onChange={handlePreview}
-                        style={{ display: "none" }}
-                        accept="application/pdf"
+                        ref={fileInputRef}
+                        onChange={handleFileSelected}
+                        style={{ display: "none" }} // Hide the file input
+                        accept="application/pdf" // Accept only PDF files
                     />
                     <Box id="pdfDisplayBlock">
                         <Button disabled={!loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
@@ -184,38 +227,38 @@ const handleDrop = async (event) => {
                 flexDirection="row"
                 class="column-fold"
                 >
-                <Directions></Directions>
-                <Box minWidth="50%" maxWidth="50%" textAlign="left" id="testFolded" marginBottom="20px">
-                    <h3>Preview</h3>
-                    <Box height id="spinner-box" className="hidden" >
-                        <Box display="flex" minHeight="80%" alignItems="baseline" justifyContent="center">
-                            <Box margin="20%">
-                                <Spinner />
+                    <Directions></Directions>
+                    <Box minWidth="50%" maxWidth="50%" textAlign="left" id="testFolded" marginBottom="20px">
+                        <h3>Preview</h3>
+                        <Box height id="spinner-box" className="hidden" >
+                            <Box display="flex" minHeight="80%" alignItems="baseline" justifyContent="center">
+                                <Box margin="20%">
+                                    <Spinner />
+                                </Box>
+                            </Box>
+                        </Box>
+                        <Box maxWidth="100%" height="100%" margin="auto" id="document-box" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
+                            <Box width={previewWidth} margin="auto" minHeight="80%">
+                                    <Document width={previewWidth} file={foldedPDF} onLoadSuccess={onPDFFoldSuccess}>
+                                        <Page
+                                            pageNumber={pageNumberFolded}
+                                            renderAnnotationLayer={false}
+                                            renderTextLayer={false}
+                                            width={previewWidth}
+                                            >
+
+                                        </Page>
+                                    </Document>
+                            </Box>
+                            <Box display="flex" width="100%" justifyContent="center">
+                                <Button style={{ width: "50%", fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
+                                <Button style={{ width: "50%", fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
                             </Box>
                         </Box>
                     </Box>
-                    <Box maxWidth="100%" height="100%" margin="auto" id="document-box" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
-                        <Box width={pageWidth} margin="auto" minHeight="80%">
-                                <Document width={pageWidth} file={foldedPDF} onLoadSuccess={onDocumentLoadSuccessFolded}>
-                                    <Page
-                                        pageNumber={pageNumberFolded}
-                                        renderAnnotationLayer={false}
-                                        renderTextLayer={false}
-                                        width={pageWidth}
-                                        >
-
-                                    </Page>
-                                </Document>
-                        </Box>
-                        <Box display="flex" width="100%" justifyContent="center">
-                            <Button style={{ width: "50%", fontSize: "40px" }} onClick={decrementFolded}> ⇐ </Button>
-                            <Button style={{ width: "50%", fontSize: "40px" }} onClick={incrementFolded}> ⇒ </Button>
-                        </Box>
-                    </Box>
                 </Box>
+                <Footer></Footer>
             </Box>
-            <Footer></Footer>
-        </Box>
     );
 };
 
