@@ -22,7 +22,7 @@ const Main = () => {
     // auto-calculated width of the pdf preview (in pixels)
     const [previewWidth, setPreviewWidth] = useState();
     // our pdf manipulation class itself
-    const [impose, setImpose] = useState(() => new Impose());
+    const [impose] = useState(() => new Impose());
 
     // Set the path to the PDF.js worker from a CDN
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
