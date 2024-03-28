@@ -123,9 +123,6 @@ export default class Impose {
 
         for (let pageIndex = 1; pageIndex < this.pdf.getPageCount() - 1; pageIndex++) {
             const page = this.pdf.getPage(pageIndex);
-
-            // Assuming you have a way to detect spreads. If this page is a spread, proceed.
-            if (true) {
             const {width, height} = page.getSize();
             const middle = width / 2;
 
@@ -148,18 +145,13 @@ export default class Impose {
                 top: height,
             });
             rightPage.drawPage(copiedPageRight);
-            } else {
-            // For non-spread pages, just copy the page as is
-            const [copiedPage] = await newPdfDoc.copyPages(this.pdf, [pageIndex]);
-            newPdfDoc.addPage(copiedPage);
-            }
         }
         
         // For non-spread pages, just copy the page as is
         console.log(`last page: ${this.pdf.getPageCount()-1}`);
         const [copiedLastPage] = await newPdfDoc.copyPages(this.pdf, [this.pdf.getPageCount()-1]);
         newPdfDoc.addPage(copiedLastPage);
-        
+        this.pdf = newPdfDoc;
         return newPdfDoc;
     }
 
