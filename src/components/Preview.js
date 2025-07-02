@@ -39,7 +39,7 @@ const Preview = () => {
     }, [sharedState]);
 
     return (
-        <div>
+        <div class="preview">
             <h3>Preview</h3>
             <Box height id="spinner-box" className="hidden" >
                 <Box display="flex" minHeight="80%" alignItems="baseline" justifyContent="center">
@@ -48,7 +48,7 @@ const Preview = () => {
                     </Box>
                 </Box>
             </Box>
-            <Box maxWidth="100%" height="100%" margin="auto" id="document-box" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
+            <Box maxWidth="100%" height="100%" margin="auto" id="document-box" flexGlow="1" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
                 <Box width={sharedState.previewWidth} margin="auto" minHeight="80%">
                         <Document width={sharedState.previewWidth} file={sharedState.foldedPDF} onLoadSuccess={onPDFFoldSuccess}>
                             <Page
