@@ -17,7 +17,7 @@ Currently it only does two page imposition, which is a very comfortable size for
 
 It can only create a single signature. 
 
-It will only impose in left-to-right order.
+It can impose in both right-to-left and left-to-right order.
 
 This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">Comic Fury Zine</a>, a free comics anthology.
 
@@ -32,6 +32,8 @@ This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">C
 [x] Spread/Page detection
 
 [x] Drag and Drop
+
+[x] RTL Print Order
 
 [ ] Configurable number of pages per sheet
 

@@ -19,11 +19,11 @@ const Directions = () => {
                     imposing a PDF of a different length, it will pad out the PDF with blank white pages.
                     It sticks these pages at the end of the PDF, just inside the back cover.  It only
                     does two page imposition, which is a very comfortable size for US Letter size printing.
-                    It can only create a single signature.  It will only impose in left-to-right order.  
+                    It can only create a single signature.  It supports RTL (right-to-left) reading order.
                 </p>
                 <p>
-                    If there are additional features you are interested in, please let me know via
-                    the Github link below!
+                    Please feel free to log bugs if you find any.  If there are additional features you
+                    are interested in, please let me know via the Github link below!
                 </p>
             </Box>
             <Box>
@@ -47,6 +47,10 @@ const Directions = () => {
                     <li>
                         (manual duplex only)
                         Take stack of papers, flip upside down, and reinsert into printer tray
+                    </li>
+                    <li>
+                        (manual duplex only)
+                        Set printer settings to only print even pages and print
                     </li>
                 </ol>
             </Box>
