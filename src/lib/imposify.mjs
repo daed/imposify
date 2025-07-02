@@ -238,12 +238,27 @@ export default class Impose {
         this.pdf = newPdf;
     }
     
-    async createBooklet() {
+    async createBooklet(options) {
         // load pdf -> split spreads -> pad pages -> reorder for stuff
         if (await this.isSpreadPrinted()) {
             console.log("spread pages detected in pdf, splitting!");
             await this.detachSpreads();
         }
+
+        if (options && options.rtl) {
+            console.log("rtl option detected, reversing pages");
+            // Reverse the pages in the PDF document
+            const reversePdf = await PDFDocument.create();
+            for (let i = this.pdf.getPageCount() - 1; i >= 0; i--) {
+                const [page] = await reversePdf.copyPages(this.pdf, [i]);
+                reversePdf.addPage(page);
+            }
+            this.pdf = reversePdf;
+        }
+        else {
+            console.log("no rtl option detected, keeping pages in order");
+        }
+        
         // Calculate how many blank pages are needed to make the page count a multiple of 4
         let pagesToAdd = (4 - (this.length() % 4)) % 4; // This ensures that we add pages only if needed
         console.log(`pages to add: ${pagesToAdd}`);
