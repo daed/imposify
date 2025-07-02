@@ -1,19 +1,35 @@
-import React, { useEffect,  useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Directions from "./Directions";
 import Footer from "./Footer";
 import Title from "./Title";
 import Preview from "./Preview";
 import Controls from "./Controls";
-import { Box, Button, Typography } from "@mui/material";
+import { Box, Typography } from "@mui/material";
 import Impose from "../lib/imposify.mjs";
-import { Document, Page, pdfjs } from "react-pdf";
+import { pdfjs } from "react-pdf";
 import { useAppContext } from '../context/AppContext';
+
+// Turns the spinner on/off via CSS.  doing it this way instead of
+// via react state seems to result in a quicker loading initial
+// image than allowing a rerender would.
+const setSpinner = (val) => {
+    const docBox = document.getElementById("document-box");
+    const spinBox = document.getElementById("spinner-box")
+    if (val) {
+        docBox.classList = "hidden";
+        spinBox.classList = "";
+    }
+    else {
+        docBox.classList = "doc-box";
+        spinBox.classList = "hidden";
+    }
+};
 
 const Main = () => {
 
     // Boolean to determine if we are dragging a file
     const [isDragging, setIsDragging] = useState(false);
-    const [mode, setMode] = useState(0);
+    const [mode] = useState(0);
     
     const { sharedState, setSharedState } = useAppContext();
     // our pdf manipulation class itself
@@ -22,75 +38,60 @@ const Main = () => {
     // Set the path to the PDF.js worker from a CDN
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
 
-
-    // Turns the spinner on/off via CSS.  doing it this way instead of
-    // via react state seems to result in a quicker loading initial
-    // image than allowing a rerender would.
-    const setSpinner = (val) => {
-        const docBox = document.getElementById("document-box");
-        const spinBox = document.getElementById("spinner-box")
-        if (val) {
-            docBox.classList = "hidden";
-            spinBox.classList = "";
-        }
-        else {
-            docBox.classList = "doc-box";
-            spinBox.classList = "hidden";
-        }
-    };
-
-    // pdf file passed to imposify via drag and drop or by open
-    // menu.  currently this function loads a pdf, imposes it
-    // via a simple two-page spread method, converts it back to
-    // a pdf blob, and prepares it for rendering.
-    const processFile = async (file) => {
-        handleResize();
-        setSharedState({...sharedState, pageNumberFolded: 1});
-        let completedPDF = false;
-        try {
-            setSpinner(true);
-            console.log("loading");
-            // load pdf here
-            await impose.loadPDF(await file.arrayBuffer());
-            console.log("imposing");
-            // createBooklet() does a lot all at once.
-            const completedPdf = await impose.createBooklet({rtl: sharedState.rtl});
-            console.log("converting to binary blob");
-            // generate blob from pdf
-            if (completedPdf) {
-                const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
-                const blob = new Blob([completedPdf], { type: "application/pdf" });
-                console.log("setting state for preview rendering")
-                setSharedState({...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true});
-                console.log(sharedState);
-            }
-            else {
-                throw new Error(`completedPDF was ${completedPDF}`);
-            }
-        } catch (error) {
-            console.error("Error processing file:", error);
-        }
-        // We're loaded but we should delay unshowing the Spinner just a while
-        setTimeout(() => setSpinner(false), 1250);
-    };
-
-    const handleResize = () => {
-        setSharedState(currentState => {
-            const newPreviewWidth = window.innerWidth > 599 ? window.innerWidth * 0.4 : window.innerWidth * 0.8;
-            return {...currentState, previewWidth: newPreviewWidth};
-        });
-    };
-
     useEffect(() => {
         setSharedState(currentState => {
             const newPreviewWidth = window.innerWidth > 599 ? window.innerWidth * 0.4 : window.innerWidth * 0.8;
             return {...currentState, previewWidth: newPreviewWidth};
         });
-    }, []);
+    }, [setSharedState]);
 
     useEffect(() => {
+        
+        const handleResize = () => {
+            setSharedState(currentState => {
+                const newPreviewWidth = window.innerWidth > 599 ? window.innerWidth * 0.4 : window.innerWidth * 0.8;
+                return {...currentState, previewWidth: newPreviewWidth};
+            });
+        };
+        
+        // pdf file passed to imposify via drag and drop or by open
+        // menu.  currently this function loads a pdf, imposes it
+        // via a simple two-page spread method, converts it back to
+        // a pdf blob, and prepares it for rendering.
+        const processFile = async (file) => {
+            handleResize();
+            let completedPDF = false;
+            try {
+                setSpinner(true);
+                console.log("loading");
+                // load pdf here
+                await impose.loadPDF(await file.arrayBuffer());
+                console.log("imposing");
+                // createBooklet() does a lot all at once.
+                const completedPdf = await impose.createBooklet({rtl: sharedState.rtl});
+                console.log("converting to binary blob");
+                // generate blob from pdf
+                if (completedPdf) {
+                    const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
+                    const blob = new Blob([completedPdf], { type: "application/pdf" });
+                    console.log("setting state for preview rendering")
+                    setTimeout(() => {
+                        setSharedState({...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true});
+                    }, 1000);
+                    console.log(sharedState);
+                }
+                else {
+                    throw new Error(`completedPDF was ${completedPDF}`);
+                }
+            } catch (error) {
+                console.error("Error processing file:", error);
+            }
+            // We're loaded but we should delay unshowing the Spinner just a while
+            setTimeout(() => setSpinner(false), 1250);
+        };
         processFile(sharedState.origPDF);
-    }, [sharedState.origPDF]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [impose, sharedState.rtl, setSharedState, sharedState.origPDF]);
     
     useEffect(() => {
         // hurl the imposify instance at the sharedState
@@ -123,11 +124,17 @@ const Main = () => {
     };
 
     useEffect(() => {
+        const handleResize = () => {
+            setSharedState(currentState => {
+                const newPreviewWidth = window.innerWidth > 599 ? window.innerWidth * 0.4 : window.innerWidth * 0.8;
+                return {...currentState, previewWidth: newPreviewWidth};
+            });
+        };
         window.addEventListener('resize', handleResize);
         return () => {
             window.removeEventListener('resize', handleResize);
         };
-    }, []);
+    }, [setSharedState]);
 
     return (
         <Box id="main"
