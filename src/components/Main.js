@@ -45,52 +45,52 @@ const Main = () => {
         });
     }, [setSharedState]);
 
-    useEffect(() => {
-        
-        const handleResize = () => {
-            setSharedState(currentState => {
-                const newPreviewWidth = window.innerWidth > 599 ? window.innerWidth * 0.4 : window.innerWidth * 0.8;
-                return {...currentState, previewWidth: newPreviewWidth};
-            });
-        };
-        
-        // pdf file passed to imposify via drag and drop or by open
-        // menu.  currently this function loads a pdf, imposes it
-        // via a simple two-page spread method, converts it back to
-        // a pdf blob, and prepares it for rendering.
-        const processFile = async (file) => {
-            handleResize();
-            let completedPDF = false;
-            try {
-                setSpinner(true);
-                console.log("loading");
-                // load pdf here
-                await impose.loadPDF(await file.arrayBuffer());
-                console.log("imposing");
-                // createBooklet() does a lot all at once.
-                const completedPdf = await impose.createBooklet({rtl: sharedState.rtl});
-                console.log("converting to binary blob");
-                // generate blob from pdf
-                if (completedPdf) {
-                    const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
-                    const blob = new Blob([completedPdf], { type: "application/pdf" });
-                    console.log("setting state for preview rendering")
-                    setTimeout(() => {
-                        setSharedState({...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true});
-                    }, 1000);
-                    console.log(sharedState);
-                }
-                else {
-                    throw new Error(`completedPDF was ${completedPDF}`);
-                }
-            } catch (error) {
-                console.error("Error processing file:", error);
+    // Helper to update preview width based on window size
+    const handleResize = (setSharedState) => {
+        setSharedState(currentState => {
+            const newPreviewWidth = window.innerWidth > 599 ? window.innerWidth * 0.4 : window.innerWidth * 0.8;
+            return { ...currentState, previewWidth: newPreviewWidth };
+        });
+    };
+
+    // Handles loading, imposing, and preparing the PDF for preview
+    const processFile = async ({ file, impose, sharedState, setSharedState }) => {
+        handleResize(setSharedState);
+        let completedPDF = false;
+        try {
+            setSpinner(true);
+            console.log("loading");
+            await impose.loadPDF(await file.arrayBuffer());
+            console.log("imposing");
+            const completedPdf = await impose.createBooklet({ rtl: sharedState.rtl });
+            console.log("converting to binary blob");
+            if (completedPdf) {
+                const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
+                const blob = new Blob([completedPdf], { type: "application/pdf" });
+                console.log("setting state for preview rendering");
+                setTimeout(() => {
+                    setSharedState({ ...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true });
+                }, 1000);
+                console.log(sharedState);
+            } else {
+                throw new Error(`completedPDF was ${completedPDF}`);
             }
-            // We're loaded but we should delay unshowing the Spinner just a while
-            setTimeout(() => setSpinner(false), 1250);
-        };
-        processFile(sharedState.origPDF);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+        } catch (error) {
+            console.error("Error processing file:", error);
+        }
+        setTimeout(() => setSpinner(false), 1250);
+    };
+
+    useEffect(() => {
+        if (sharedState.origPDF) {
+            processFile({
+                file: sharedState.origPDF,
+                impose,
+                sharedState,
+                setSharedState
+            });
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [impose, sharedState.rtl, setSharedState, sharedState.origPDF]);
     
     useEffect(() => {
