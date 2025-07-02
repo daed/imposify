@@ -21,6 +21,31 @@ const Controls = () => {
         }
     };
 
+    const toggleRTL = async (e) => {
+        e.preventDefault();
+        // toggle the rtl state
+        const updatedRTL = !sharedState.rtl;
+        if (sharedState.loaded) {
+            // reload original PDF
+            await sharedState.impose.loadPDF(await sharedState.origPDF.arrayBuffer());
+            // re-render it
+            const completedPdf = sharedState.impose.createBooklet({rtl: updatedRTL});
+            const blob = new Blob([(await completedPdf)], { type: "application/pdf" });
+            setSharedState({
+                ...sharedState,
+                foldedPDF: blob,
+                rtl: updatedRTL,
+            })
+        }
+        else {
+            // if we don't have a loaded PDF, just toggle the rtl state
+            setSharedState({
+                ...sharedState,
+                rtl: updatedRTL,
+            });
+        }
+    }
+
     // "download pdf" gets clicked by the user.  adds a anchor
     // to the page and triggers it to start the file download.
     const handleDownloadButtonClick = () => {
@@ -51,6 +76,13 @@ const Controls = () => {
             />
             <Box id="pdfDisplayBlock">
                 <Button disabled={!sharedState.loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
+            </Box>
+
+            <Box style={{ marginLeft: "10px", paddingLeft: "10px", borderLeft: "1px solid #ccc"}}>
+
+            <Button onClick={toggleRTL}>
+                {sharedState.rtl ? "⇐ Right-To-Left " : "Left-To-Right ⇒"}
+            </Button>
             </Box>
         </Box>
     );

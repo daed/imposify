@@ -54,13 +54,14 @@ const Main = () => {
             await impose.loadPDF(await file.arrayBuffer());
             console.log("imposing");
             // createBooklet() does a lot all at once.
-            const completedPdf = await impose.createBooklet();
+            const completedPdf = await impose.createBooklet({rtl: sharedState.rtl});
             console.log("converting to binary blob");
             // generate blob from pdf
             if (completedPdf) {
+                const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
                 const blob = new Blob([completedPdf], { type: "application/pdf" });
                 console.log("setting state for preview rendering")
-                setSharedState({...sharedState, foldedPDF: blob, loaded: true});
+                setSharedState({...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true});
                 console.log(sharedState);
             }
             else {
@@ -91,6 +92,15 @@ const Main = () => {
         processFile(sharedState.origPDF);
     }, [sharedState.origPDF]);
     
+    useEffect(() => {
+        // hurl the imposify instance at the sharedState
+        // so that it can be used in the controls and preview
+        // components.
+        setSharedState(currentState => {
+            return {...currentState, impose: impose};
+        });
+    }, [impose, setSharedState]);
+
     // handle drag and drop
     const handleDrop = async (event) => {
         event.preventDefault();
