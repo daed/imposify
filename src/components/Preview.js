@@ -39,7 +39,7 @@ const Preview = () => {
     }, [sharedState]);
 
     return (
-        <div class="preview">
+        <div className="preview">
             <h3>Preview</h3>
             <Box height id="spinner-box" className="hidden" >
                 <Box display="flex" minHeight="80%" alignItems="baseline" justifyContent="center">
