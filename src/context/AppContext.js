@@ -13,7 +13,9 @@ export const AppProvider = ({ children }) => {
     pageNumberFolded: 1,
     previewWidth: undefined,
     loaded: false,
-    numPagesFolded: null
+    numPagesFolded: null,
+    rtl: false, // right-to-left, off by default
+    impose: null, // This will hold the imposify instance
   }); // Initial state
 
   // The value that will be passed to all child components
