@@ -1,8 +1,8 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import { Box, Button } from "@mui/material";
 import Spinner from "./Spinner";
 import { useAppContext } from '../context/AppContext';
-import { Document, Page, pdfjs } from "react-pdf";
+import { Document, Page } from "react-pdf";
 
 const Preview = () => {
     const { sharedState, setSharedState } = useAppContext();
@@ -48,7 +48,7 @@ const Preview = () => {
                     </Box>
                 </Box>
             </Box>
-            <Box maxWidth="100%" height="100%" margin="auto" id="document-box" flexGlow="1" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
+            <Box maxWidth="100%" height="100%" margin="auto" id="document-box" className="doc-box" display="flex" flexDirection="column" justifyContent="space-between">
                 <Box width={sharedState.previewWidth} margin="auto" minHeight="80%">
                         <Document width={sharedState.previewWidth} file={sharedState.foldedPDF} onLoadSuccess={onPDFFoldSuccess}>
                             <Page
