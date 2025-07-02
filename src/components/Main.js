@@ -58,7 +58,7 @@ const Main = () => {
             console.log("converting to binary blob");
             // generate blob from pdf
             if (completedPdf) {
-                const pageIndex = sharedState.rtl ? completedPdf.getPages().length - 1 : 1;
+                const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
                 const blob = new Blob([completedPdf], { type: "application/pdf" });
                 console.log("setting state for preview rendering")
                 setSharedState({...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true});
