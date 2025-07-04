@@ -65,7 +65,7 @@ const Main = () => {
             const completedPdf = await impose.createBooklet({ rtl: sharedState.rtl });
             console.log("converting to binary blob");
             if (completedPdf) {
-                const pageIndex = sharedState.rtl ? completedPdf.getPages().length : 1;
+                const pageIndex = 1;
                 const blob = new Blob([completedPdf], { type: "application/pdf" });
                 console.log("setting state for preview rendering");
                 setTimeout(() => {

@@ -245,6 +245,12 @@ export default class Impose {
             await this.detachSpreads();
         }
 
+        // Calculate how many blank pages are needed to make the page count a multiple of 4
+        let pagesToAdd = (4 - (this.length() % 4)) % 4; // This ensures that we add pages only if needed
+        console.log(`pages to add: ${pagesToAdd}`);
+        if (pagesToAdd)	await this.addPadding(pagesToAdd);
+        console.log(`new pdf length: ${this.pdf.getPageCount()}`);
+
         if (options && options.rtl) {
             console.log("rtl option detected, reversing pages");
             // Reverse the pages in the PDF document
@@ -258,12 +264,6 @@ export default class Impose {
         else {
             console.log("no rtl option detected, keeping pages in order");
         }
-        
-        // Calculate how many blank pages are needed to make the page count a multiple of 4
-        let pagesToAdd = (4 - (this.length() % 4)) % 4; // This ensures that we add pages only if needed
-        console.log(`pages to add: ${pagesToAdd}`);
-        if (pagesToAdd)	await this.addPadding(pagesToAdd);
-        console.log(`new pdf length: ${this.pdf.getPageCount()}`);
 
         console.log("folding pdf");
         await this.foldPDF();
