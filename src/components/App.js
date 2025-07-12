@@ -37,7 +37,7 @@ export default class App extends React.Component {
     render() {
         return (
             <ThemeProvider theme={theme}>
-            <Router>
+            <Router basename="/">
               <Routes>
                 <Route path="/" element={
                   <AppProvider>
