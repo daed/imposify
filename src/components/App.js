@@ -41,7 +41,7 @@ export default class App extends React.Component {
               <Routes>
                 <Route path="/" element={
                   <AppProvider>
-                    <div class="container">
+                    <div className="container">
                       <Main />
                     </div>
                   </AppProvider>
