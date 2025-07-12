@@ -20,7 +20,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
-    "predeploy": "yarn run build",
+    "postbuild": "cp build/index.html build/404.html",
+    "predeploy": "yarn run build && yarn run postbuild",
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
