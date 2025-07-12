@@ -1,5 +1,7 @@
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import React from 'react';
 import Main from './Main';
+import About from './About';
 import { AppProvider } from '../context/AppContext';
 import { createTheme, ThemeProvider } from '@mui/material/styles';
 
@@ -35,11 +37,18 @@ export default class App extends React.Component {
     render() {
         return (
             <ThemeProvider theme={theme}>
-              <AppProvider>
-                <div class="container">
-                    <Main />
-                </div>
-              </AppProvider>
+            <Router>
+              <Routes>
+                <Route path="/" element={
+                  <AppProvider>
+                    <div class="container">
+                      <Main />
+                    </div>
+                  </AppProvider>
+                  } />
+                <Route path="/about" element={<About />} />
+              </Routes>
+            </Router>
             </ThemeProvider>
         );
     }

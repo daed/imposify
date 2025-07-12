@@ -5,6 +5,7 @@ const Directions = () => {
     return (
         <Box class="full-mobile" textAlign="left" maxWidth="40%">
             <Box class="hidden-mobile" textAlign="left">
+                <p><a href="about">See the about page for the long version</a></p>
                 <h3>
                     Info
                 </h3>
