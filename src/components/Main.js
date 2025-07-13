@@ -5,7 +5,7 @@ import Title from "./Title";
 import Preview from "./Preview";
 import Controls from "./Controls";
 import { Box, Typography } from "@mui/material";
-import Impose from "../lib/imposify.mjs";
+import Impose from "../lib/imposify2.mjs";
 import { pdfjs } from "react-pdf";
 import { useAppContext } from '../context/AppContext';
 
@@ -62,7 +62,7 @@ const Main = () => {
             console.log("loading");
             await impose.loadPDF(await file.arrayBuffer());
             console.log("imposing");
-            const completedPdf = await impose.createBooklet({ rtl: sharedState.rtl });
+            const completedPdf = await impose.createBooklet({ rtl: sharedState.rtl, signatures: sharedState.signatures, padFront: sharedState.padFront });
             console.log("converting to binary blob");
             if (completedPdf) {
                 const pageIndex = 1;

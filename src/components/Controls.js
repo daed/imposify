@@ -8,6 +8,14 @@ const Controls = () => {
     const fileInputRef = useRef(null);
     const { sharedState, setSharedState } = useAppContext();
 
+    const makeImposifyOptions = (options) => {
+        return {
+            rtl: options.rtl || sharedState.rtl || false,
+            signatures: options.signatures || sharedState.signatures || 1,
+            padFront: options.padFront || sharedState.padFront || false,
+        };
+    };
+
     const handleOpenButtonClick = () => {
         // Programmatically click the hidden file input
         fileInputRef.current.click();
@@ -21,6 +29,32 @@ const Controls = () => {
         }
     };
 
+    const padFront = async (e) => {
+        e.preventDefault();
+        const updatedPadFront = !sharedState.padFront;
+        if (sharedState.loaded) {
+            // reload original PDF
+            await sharedState.impose.loadPDF(await sharedState.origPDF.arrayBuffer());
+            // re-render it
+            const options = makeImposifyOptions({ padFront: updatedPadFront });
+            const completedPdf = await sharedState.impose.createBooklet(options);
+            const blob = new Blob([(await completedPdf)], { type: "application/pdf" });
+            setSharedState({
+                ...sharedState,
+                foldedPDF: blob,
+                padFront: updatedPadFront,
+            })
+        }
+        else {
+            // if we don't have a loaded PDF, just toggle the padFront state
+            setSharedState({
+                ...sharedState,
+                padFront: updatedPadFront,
+            });
+        }
+    };
+
+
     const toggleRTL = async (e) => {
         e.preventDefault();
         // toggle the rtl state
@@ -29,7 +63,8 @@ const Controls = () => {
             // reload original PDF
             await sharedState.impose.loadPDF(await sharedState.origPDF.arrayBuffer());
             // re-render it
-            const completedPdf = sharedState.impose.createBooklet({rtl: updatedRTL});
+            const options = makeImposifyOptions({ rtl: updatedRTL });
+            const completedPdf = sharedState.impose.createBooklet(options);
             const blob = new Blob([(await completedPdf)], { type: "application/pdf" });
             setSharedState({
                 ...sharedState,
@@ -79,10 +114,12 @@ const Controls = () => {
             </Box>
 
             <Box style={{ marginLeft: "10px", paddingLeft: "10px", borderLeft: "1px solid #ccc"}}>
-
-            <Button onClick={toggleRTL}>
-                {sharedState.rtl ? "⇐ Right-To-Left " : "Left-To-Right ⇒"}
-            </Button>
+                <Button onClick={toggleRTL}>
+                    {sharedState.rtl ? "⇐ Right-To-Left " : "Left-To-Right ⇒"}
+                </Button>
+                <Button onClick={padFront}>
+                    {sharedState.padFront ? "Remove Front Padding" : "Add Front Padding"}
+                </Button>
             </Box>
         </Box>
     );
