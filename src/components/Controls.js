@@ -1,6 +1,17 @@
-import React, { useRef } from "react";
-import { Box, Button } from "@mui/material";
+import React, { useEffect, useRef, useState } from "react";
+import {
+    Box,
+    Button,
+    Divider,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    TextField,
+    ToggleButton,
+} from "@mui/material";
 import { useAppContext } from '../context/AppContext';
+import { imposeFile } from '../lib/imposeFile';
 
 
 const Controls = () => {
@@ -8,20 +19,17 @@ const Controls = () => {
     const fileInputRef = useRef(null);
     const { sharedState, setSharedState } = useAppContext();
 
-    const makeImposifyOptions = (options) => {
-        return {
-            rtl: options.rtl || sharedState.rtl || false,
-            signatures: options.signatures || sharedState.signatures || 1,
-            padFront: options.padFront || sharedState.padFront || false,
-        };
-    };
+    // keeping this separate from sharedState so it doesn't rebuild the whole
+    // PDF on every keystroke, only when you click away or hit enter
+    const [creepInput, setCreepInput] = useState(String(sharedState.creepPerSheetMm));
+    useEffect(() => {
+        setCreepInput(String(sharedState.creepPerSheetMm));
+    }, [sharedState.creepPerSheetMm]);
 
     const handleOpenButtonClick = () => {
-        // Programmatically click the hidden file input
         fileInputRef.current.click();
     };
 
-    // handle open button
     const handleFileSelected = async (event) => {
         const file = event.target.files[0];
         if (file) {
@@ -29,57 +37,48 @@ const Controls = () => {
         }
     };
 
-    const padFront = async (e) => {
-        e.preventDefault();
-        const updatedPadFront = !sharedState.padFront;
-        if (sharedState.loaded) {
-            // reload original PDF
-            await sharedState.impose.loadPDF(await sharedState.origPDF.arrayBuffer());
-            // re-render it
-            const options = makeImposifyOptions({ padFront: updatedPadFront });
-            const completedPdf = await sharedState.impose.createBooklet(options);
-            const blob = new Blob([(await completedPdf)], { type: "application/pdf" });
-            setSharedState({
-                ...sharedState,
-                foldedPDF: blob,
-                padFront: updatedPadFront,
-            })
-        }
-        else {
-            // if we don't have a loaded PDF, just toggle the padFront state
-            setSharedState({
-                ...sharedState,
-                padFront: updatedPadFront,
+    // updates one option and rebuilds the booklet, but only if we've
+    // already got a file loaded
+    const updateImposeOption = async (patch) => {
+        const newState = { ...sharedState, ...patch };
+        setSharedState(newState);
+        if (newState.loaded && newState.origPDF) {
+            const foldedPDF = await imposeFile(newState.origPDF, {
+                rtl: newState.rtl,
+                signatures: newState.signatures,
+                padFront: newState.padFront,
+                creepPerSheetMm: newState.creepPerSheetMm,
+                spreadDetection: newState.spreadDetection,
             });
+            setSharedState({ ...newState, foldedPDF });
         }
     };
 
+    const handleSignaturesChange = (event) => {
+        const newSignatures = parseInt(event.target.value, 10) || 1;
+        updateImposeOption({ signatures: newSignatures });
+    };
 
-    const toggleRTL = async (e) => {
-        e.preventDefault();
-        // toggle the rtl state
-        const updatedRTL = !sharedState.rtl;
-        if (sharedState.loaded) {
-            // reload original PDF
-            await sharedState.impose.loadPDF(await sharedState.origPDF.arrayBuffer());
-            // re-render it
-            const options = makeImposifyOptions({ rtl: updatedRTL });
-            const completedPdf = sharedState.impose.createBooklet(options);
-            const blob = new Blob([(await completedPdf)], { type: "application/pdf" });
-            setSharedState({
-                ...sharedState,
-                foldedPDF: blob,
-                rtl: updatedRTL,
-            })
+    const handleSpreadDetectionChange = (event) => {
+        updateImposeOption({ spreadDetection: event.target.value });
+    };
+
+    const handleFrontPaddingToggle = () => {
+        updateImposeOption({ padFront: !sharedState.padFront });
+    };
+
+    const handleRTLToggle = () => {
+        updateImposeOption({ rtl: !sharedState.rtl });
+    };
+
+    const commitCreepChange = () => {
+        const value = parseFloat(creepInput);
+        const newCreep = Number.isFinite(value) && value >= 0 ? value : 0;
+        setCreepInput(String(newCreep));
+        if (newCreep !== sharedState.creepPerSheetMm) {
+            updateImposeOption({ creepPerSheetMm: newCreep });
         }
-        else {
-            // if we don't have a loaded PDF, just toggle the rtl state
-            setSharedState({
-                ...sharedState,
-                rtl: updatedRTL,
-            });
-        }
-    }
+    };
 
     // "download pdf" gets clicked by the user.  adds a anchor
     // to the page and triggers it to start the file download.
@@ -100,26 +99,68 @@ const Controls = () => {
     };
 
     return (
-        <Box display="flex">
-            <Button onClick={handleOpenButtonClick}>Open PDF</Button>
-            <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleFileSelected}
-                style={{ display: "none" }} // Hide the file input
-                accept="application/pdf" // Accept only PDF files
-            />
-            <Box id="pdfDisplayBlock">
-                <Button disabled={!sharedState.loaded} onClick={handleDownloadButtonClick}>Download PDF</Button>
+        <Box display="flex" flexDirection="column" alignItems="center" gap={1.5} sx={{ mb: 2 }}>
+            <Box display="flex" flexWrap="wrap" justifyContent="center" alignItems="center" gap={1}>
+                <Button variant="outlined" onClick={handleOpenButtonClick}>Open PDF</Button>
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelected}
+                    style={{ display: "none" }} // Hide the file input
+                    accept="application/pdf" // Accept only PDF files
+                />
+                <Button variant="outlined" disabled={!sharedState.loaded} onClick={handleDownloadButtonClick}>
+                    Download PDF
+                </Button>
             </Box>
 
-            <Box style={{ marginLeft: "10px", paddingLeft: "10px", borderLeft: "1px solid #ccc"}}>
-                <Button onClick={toggleRTL}>
-                    {sharedState.rtl ? "⇐ Right-To-Left " : "Left-To-Right ⇒"}
-                </Button>
-                <Button onClick={padFront}>
-                    {sharedState.padFront ? "Remove Front Padding" : "Add Front Padding"}
-                </Button>
+            <Divider flexItem sx={{ borderColor: 'rgba(144, 238, 144, 0.2)', width: '100%', maxWidth: 480 }} />
+
+            <Box display="flex" flexWrap="wrap" justifyContent="center" alignItems="center" gap={1.5}>
+                <ToggleButton value="rtl" size="small" selected={sharedState.rtl} onChange={handleRTLToggle}>
+                    Right-to-Left
+                </ToggleButton>
+                <ToggleButton value="padFront" size="small" selected={sharedState.padFront} onChange={handleFrontPaddingToggle}>
+                    Front Padding
+                </ToggleButton>
+                <FormControl size="small" sx={{ minWidth: 150 }}>
+                    <InputLabel id="signatures-label">Signatures</InputLabel>
+                    <Select
+                        labelId="signatures-label"
+                        label="Signatures"
+                        value={sharedState.signatures}
+                        onChange={handleSignaturesChange}
+                    >
+                        <MenuItem value={1}>1 (Single)</MenuItem>
+                        <MenuItem value={2}>2</MenuItem>
+                        <MenuItem value={3}>3</MenuItem>
+                        <MenuItem value={4}>4</MenuItem>
+                    </Select>
+                </FormControl>
+                <TextField
+                    size="small"
+                    type="number"
+                    label="Creep per sheet (mm)"
+                    inputProps={{ min: 0, step: 0.1 }}
+                    sx={{ width: 170 }}
+                    value={creepInput}
+                    onChange={(e) => setCreepInput(e.target.value)}
+                    onBlur={commitCreepChange}
+                    onKeyDown={(e) => { if (e.key === 'Enter') e.target.blur(); }}
+                />
+                <FormControl size="small" sx={{ minWidth: 160 }}>
+                    <InputLabel id="spread-detection-label">Spread Detection</InputLabel>
+                    <Select
+                        labelId="spread-detection-label"
+                        label="Spread Detection"
+                        value={sharedState.spreadDetection}
+                        onChange={handleSpreadDetectionChange}
+                    >
+                        <MenuItem value="auto">Auto</MenuItem>
+                        <MenuItem value="on">On</MenuItem>
+                        <MenuItem value="off">Off</MenuItem>
+                    </Select>
+                </FormControl>
             </Box>
         </Box>
     );

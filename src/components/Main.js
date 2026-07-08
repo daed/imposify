@@ -5,7 +5,7 @@ import Title from "./Title";
 import Preview from "./Preview";
 import Controls from "./Controls";
 import { Box, Typography } from "@mui/material";
-import Impose from "../lib/imposify2.mjs";
+import { imposeFile } from "../lib/imposeFile";
 import { pdfjs } from "react-pdf";
 import { useAppContext } from '../context/AppContext';
 
@@ -32,8 +32,6 @@ const Main = () => {
     const [mode] = useState(0);
     
     const { sharedState, setSharedState } = useAppContext();
-    // our pdf manipulation class itself
-    const [impose] = useState(() => new Impose());
 
     // Set the path to the PDF.js worker from a CDN
     pdfjs.GlobalWorkerOptions.workerSrc = `https://cdnjs.cloudflare.com/ajax/libs/pdf.js/${pdfjs.version}/pdf.worker.min.js`;
@@ -54,27 +52,15 @@ const Main = () => {
     };
 
     // Handles loading, imposing, and preparing the PDF for preview
-    const processFile = async ({ file, impose, sharedState, setSharedState }) => {
+    const processFile = async ({ file, sharedState, setSharedState }) => {
         handleResize(setSharedState);
-        let completedPDF = false;
         try {
             setSpinner(true);
-            console.log("loading");
-            await impose.loadPDF(await file.arrayBuffer());
-            console.log("imposing");
-            const completedPdf = await impose.createBooklet({ rtl: sharedState.rtl, signatures: sharedState.signatures, padFront: sharedState.padFront });
-            console.log("converting to binary blob");
-            if (completedPdf) {
-                const pageIndex = 1;
-                const blob = new Blob([completedPdf], { type: "application/pdf" });
-                console.log("setting state for preview rendering");
-                setTimeout(() => {
-                    setSharedState({ ...sharedState, pageNumberFolded: pageIndex, foldedPDF: blob, loaded: true });
-                }, 1000);
-                console.log(sharedState);
-            } else {
-                throw new Error(`completedPDF was ${completedPDF}`);
-            }
+            const foldedPDF = await imposeFile(file, { rtl: sharedState.rtl, signatures: sharedState.signatures, padFront: sharedState.padFront, creepPerSheetMm: sharedState.creepPerSheetMm, spreadDetection: sharedState.spreadDetection });
+            const pageIndex = 1;
+            setTimeout(() => {
+                setSharedState({ ...sharedState, pageNumberFolded: pageIndex, foldedPDF, loaded: true });
+            }, 1000);
         } catch (error) {
             console.error("Error processing file:", error);
         }
@@ -85,22 +71,12 @@ const Main = () => {
         if (sharedState.origPDF) {
             processFile({
                 file: sharedState.origPDF,
-                impose,
                 sharedState,
                 setSharedState
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [impose, sharedState.rtl, setSharedState, sharedState.origPDF]);
-    
-    useEffect(() => {
-        // hurl the imposify instance at the sharedState
-        // so that it can be used in the controls and preview
-        // components.
-        setSharedState(currentState => {
-            return {...currentState, impose: impose};
-        });
-    }, [impose, setSharedState]);
+    }, [sharedState.rtl, setSharedState, sharedState.origPDF]);
 
     // handle drag and drop
     const handleDrop = async (event) => {
@@ -174,13 +150,13 @@ const Main = () => {
                 <Controls></Controls>
 
                 {/* two main columns here */}
-                <Box 
-                display="flex" 
+                <Box
+                display="flex"
                 margin="auto"
                 maxWidth={1200}
                 justifyContent="space-between"
                 flexDirection="row"
-                class="column-fold"
+                className="column-fold"
                 >
                     {/* Left column, selectable, defaults to Directions */}
                     {mode === 0 && (

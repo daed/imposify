@@ -15,7 +15,14 @@ export const AppProvider = ({ children }) => {
     loaded: false,
     numPagesFolded: null,
     rtl: false, // right-to-left, off by default
-    impose: null, // This will hold the imposify instance
+    signatures: 1, // number of signatures in booklet
+    padFront: false, // shoves a blank page in right after page 1, pushes everything else over by one
+    creepPerSheetMm: 0, // the "creep" fix, shifts each sheet in toward the middle a bit
+    spreadDetection: 'auto', // auto/on/off, splits pages that look like they're pre-made 2-page spreads
+    bleed: false,
+    bleedMargin: 3,
+    trim: false,
+    trimMargin: 3,
   }); // Initial state
 
   // The value that will be passed to all child components

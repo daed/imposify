@@ -25,7 +25,7 @@
     "deploy": "NODE_DEBUG=gh-pages gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
-    "test": "react-scripts test",
+    "test": "npx jest --watchAll=false --testEnvironment=node",
     "eject": "react-scripts eject"
   },
   "eslintConfig": {
@@ -48,5 +48,6 @@
   },
   "devDependencies": {
     "@babel/plugin-proposal-private-property-in-object": "^7.21.11"
-  }
+  },
+  "test": "react-scripts test --config=jest.config"
 }

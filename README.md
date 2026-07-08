@@ -53,13 +53,56 @@ This tool is sponsored in part by <a href="https://cfzine.thecomicseries.com/">C
 
 ## Development
 
-The project is a simple React app make with create-react-app.  The configs are unejected.   Material UI is used heavily.  
+The project is a simple React app made with create-react-app. The configs are unejected. Material UI is used heavily.
 
-PDF.js is used for preview rendering, and pdf-lib handles the pdf manipulation itself. 
+PDF.js is used for preview rendering, and pdf-lib handles the pdf manipulation itself.
 
-Run `yarn start` to start up in development mode.
+## Getting Started
 
-Run `yarn build` to produce production files.
+### Run in development mode
+```
+yarn start
+```
+
+### Build for production
+```
+yarn build
+```
+
+### Run tests
+```
+yarn test
+```
+
+The test directory contains test PDFs and test files for Core functionality.
+
+## Serving Production Files
+
+To serve the built production files:
+
+```
+cd build
+python3 -m http.server 8000
+```
+
+Or use Node's built-in server:
+
+```
+cd build
+node -e "const http = require('http'); http.createServer((req, res) => { res.writeHead(200, { 'Content-Type': 'text/html' }); res.end(require('fs').readFileSync('index.html')) }).listen(8000)"
+```
+
+## Running Tests
+
+Run all tests:
+
+```
+yarn test
+```
+
+Tests use Jest and are located in:
+- test/ - Integration tests with test PDFs
+- src/lib/pdf/pipeline.test.js - Core pipeline tests
 
 ## Contributors
 
