@@ -2,20 +2,32 @@ html {
 }
 
 /* global.css */
+:root {
+  --paper:  #F1EFEA;
+  --ink:    #1C1B19;
+  --pink:   #FF3E8E;
+  --blue:   #0078BF;
+  --yellow: #FFD400;
+
+  /* --ink as r, g, b so it can be used in rgba() */
+  --ink-rgb: 28, 27, 25;
+}
+
 body {
   margin: auto;
   text-align: center;
-  font-family: Arial, sans-serif;
-  background-color: #333;
-  color: #ddd;
+  font-family: "IBM Plex Sans", Arial, sans-serif;
+  background-color: var(--paper);
+  color: var(--ink);
   width: 99%;
   height: 100%;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.035'/%3E%3C/svg%3E");
 }
 
 td {
     padding: 10px 20px 10px 20px;
-    border-top: 1px solid #ddd;
-    border-bottom: 1px solid #ddd;
+    border-top: 2px solid var(--ink);
+    border-bottom: 2px solid var(--ink);
 }
 
 .img-center {
@@ -24,11 +36,11 @@ td {
 }
 
 .about {
-  font-family: Arial, sans-serif;
+  font-family: "IBM Plex Sans", Arial, sans-serif;
   line-height: 1.6;
   margin: 0;
   padding: 20px;
-  color: #ddd;
+  color: var(--ink);
   max-width: 800px;
   margin: auto;
 }
@@ -43,36 +55,35 @@ h3 {
 
 .container {
     width: 90%;
-    max-width: 1200px;
+    max-width: 1000px;
     margin:auto;
 }
 
 p {
-  text-align: justify;
-  text-justify: inter-word; 
+  text-align: left;
 }
 
 /* Base link color */
 a {
-    color: #90EE90; /* Light Green */
-    text-decoration: none;
-    transition: color 0.3s ease; /* Smooth transition for color change */
+    color: var(--blue);
+    text-decoration: underline;
+    text-decoration-thickness: 1px;
+    transition: color 0.15s ease; /* Smooth transition for color change */
   }
-  
+
   /* Hover state */
   a:hover {
-    color: #76C76B; /* A slightly darker shade of green for contrast */
-    text-decoration: underline; /* Optional: adds underline on hover */
+    color: var(--pink);
   }
-  
+
   /* Active state */
   a:active {
-    color: #5DA356; /* Even darker green to indicate the link is being clicked */
+    color: var(--ink);
   }
-  
+
   /* Visited state */
   a:visited {
-    color: #B0C4DE; /* Light Steel Blue for a soft, distinguishable look */
+    color: var(--blue);
   }
 
 .hidden {
@@ -85,7 +96,7 @@ a {
   height: 100%;
   display: flex;
   flex-direction: column;
-} 
+}
 
 /* Style for devices with a width less than 600px */
 @media (max-width: 599px) {
@@ -117,7 +128,7 @@ a {
     justify-content: space-between;
   }
   .full-mobile {
-    width: 40%; 
+    width: 40%;
   }
 }
 
@@ -127,11 +138,11 @@ a {
 }
 
 .spinner {
-  border: 8px solid rgba(0, 0, 0, 0.1);
+  border: 8px solid rgba(var(--ink-rgb), 0.15);
   width: 90px;
   height: 90px;
   border-radius: 50%;
-  border-left-color: #90EE90;
+  border-left-color: var(--pink);
   animation: spin 1s ease infinite;
 }
 
