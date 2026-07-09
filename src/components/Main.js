@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
-import Directions from "./Directions";
 import Footer from "./Footer";
 import Title from "./Title";
 import Preview from "./Preview";
 import Controls from "./Controls";
+import Directions from "./Directions"
 import { Box, Typography } from "@mui/material";
 import { imposeFile } from "../lib/imposeFile";
 import { pdfjs } from "react-pdf";
@@ -30,7 +30,7 @@ const Main = () => {
     // Boolean to determine if we are dragging a file
     const [isDragging, setIsDragging] = useState(false);
     const [mode] = useState(0);
-    
+
     const { sharedState, setSharedState } = useAppContext();
 
     // Set the path to the PDF.js worker from a CDN
@@ -76,7 +76,7 @@ const Main = () => {
             });
         }
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [sharedState.rtl, setSharedState, sharedState.origPDF]);
+    }, [setSharedState, sharedState.origPDF]);
 
     // handle drag and drop
     const handleDrop = async (event) => {
@@ -118,13 +118,13 @@ const Main = () => {
         onDragOver={handleDragOver}
         onDragEnter={handleDragEnter}
         onDragLeave={handleDragLeave}
-        style={{ 
+        style={{
             border: isDragging ? '2px dashed #000' : '1px solid #ddd',
             backgroundColor: isDragging ? "rgba(0, 0, 0, 0.5)" : 'unset',
             maxWidth: "1200px",
             margin: "auto",
             padding: '20px',
-            textAlign: 'center' }} 
+            textAlign: 'center' }}
             >
                 {isDragging && (
                     <Box
@@ -145,25 +145,24 @@ const Main = () => {
                             Drag and drop PDF files here
                         </Typography>
                     </Box>
-                )} 
+                )}
                 <Title></Title>
-                <Controls></Controls>
 
+                <Directions></Directions>
                 {/* two main columns here */}
                 <Box
                 display="flex"
                 margin="auto"
                 maxWidth={1200}
                 justifyContent="space-between"
-                flexDirection="row"
                 className="column-fold"
                 >
-                    {/* Left column, selectable, defaults to Directions */}
+                    {/* Left column, controls */}
                     {mode === 0 && (
-                        <Directions></Directions>
+                        <Controls></Controls>
                     )}
                     {/* Right column, preview */}
-                    <Box minWidth="50%" maxWidth="50%" textAlign="left" id="testFolded" marginBottom="20px">
+                    <Box minWidth={{ xs: "100%", sm: "50%" }} maxWidth={{ xs: "100%", sm: "50%" }} textAlign="left" id="testFolded" marginBottom="20px">
                         <Preview></Preview>
                     </Box>
                 </Box>

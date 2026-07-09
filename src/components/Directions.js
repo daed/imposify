@@ -3,9 +3,8 @@ import { Box } from "@mui/material";
 
 const Directions = () => {
     return (
-        <Box className="full-mobile" textAlign="left" maxWidth="40%">
-            <Box className="hidden-mobile" textAlign="left">
-                <p><a href="about">See the about page for the long version</a></p>
+        <Box className="full-mobile" display="flex" width="100%" textAlign="left">
+            <Box textAlign="justify" width="50%">
                 <h3>
                     Info
                 </h3>
@@ -27,7 +26,7 @@ const Directions = () => {
                     are interested in, please let me know via the Github link below!
                 </p>
             </Box>
-            <Box>
+            <Box textAlign="justify" width="50%">
                 <h3>
                     Directions
                 </h3>
